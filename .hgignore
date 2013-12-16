@@ -1,0 +1,31 @@
+# use glob syntax.
+syntax: glob
+docs/_build
+__pycache__
+*.ini
+*.pyc
+*.egg
+*.egg-info
+*.db
+*.coverage
+*.git
+env
+tags
+ptags
+build
+htmlcov
+*.log
+.tags
+.tags_sorted_by_file
+*.sw*
+*~
+*.original
+*.bak
+*.orig
+hg-checklink-*
+.tox
+.idea/*
+:w
+*.sublime-project
+*.sublime-workspace
+*.ropeproject
