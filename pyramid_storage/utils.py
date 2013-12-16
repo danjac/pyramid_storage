@@ -5,7 +5,7 @@ import re
 import uuid
 import unicodedata
 
-from . import _compat
+from pyramid import compat
 
 
 _filename_ascii_strip_re = re.compile(r'[^A-Za-z0-9_.-]')
@@ -20,10 +20,10 @@ def secure_filename(filename):
 
     :param filename: the filename to secure
     """
-    if isinstance(filename, _compat.text_type):
+    if isinstance(filename, compat.text_type):
         filename = unicodedata.normalize(
             'NFKD', filename).encode('ascii', 'ignore')
-        if _compat.PY3:
+        if compat.PY3:
             filename = filename.decode('ascii')
     for sep in os.path.sep, os.path.altsep:
         if sep:

@@ -4,11 +4,12 @@ import os
 import mock
 import pytest
 
+from pyramid import compat
+
 
 def _mock_open_name():
-    from pyramid_storage import _compat
 
-    if _compat.PY3:
+    if compat.PY3:
         return 'builtins.open'
     else:
         return '__builtin__.open'

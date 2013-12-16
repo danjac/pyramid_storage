@@ -3,9 +3,9 @@
 import os
 import shutil
 
+from pyramid import compat
 from zope.interface import implementer
 
-from . import _compat
 from . import utils
 from .extensions import resolve_extensions
 from .exceptions import FileNotAllowed
@@ -57,7 +57,7 @@ class FileStorage(object):
 
         :param filename: base name of file
         """
-        return _compat.urlparse.urljoin(self.base_url, filename)
+        return compat.urlparse.urljoin(self.base_url, filename)
 
     def path(self, filename):
         """Returns absolute file path of the filename, joined to the

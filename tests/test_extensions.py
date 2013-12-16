@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 def test_resolve_extensions_if_individuals():
     from pyramid_storage.extensions import resolve_extensions
