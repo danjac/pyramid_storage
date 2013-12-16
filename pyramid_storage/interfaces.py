@@ -2,5 +2,6 @@
 
 from zope.interface import Interface
 
+
 class IFileStorage(Interface):
     pass
