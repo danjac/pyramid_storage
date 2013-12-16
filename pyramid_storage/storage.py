@@ -1,104 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 import shutil
-import uuid
-import unicodedata
-
 
 from zope.interface import implementer
 
 from . import _compat
+from . import utils
+from .extensions import resolve_extensions
 from .exceptions import FileNotAllowed
 from .interfaces import IFileStorage
-
-
-TEXT = ('txt',)
-DOCUMENTS = tuple('rtf odf ods gnumeric abw doc docx xls xls'.split())
-IMAGES = tuple('jpg jpe jpeg png gif svg bmp tiff'.split())
-AUDIO = tuple('wav mp3 aac ogg oga flac'.split())
-VIDEO = tuple('mpeg 3gp avi divx dvr flv mp4 wmv'.split())
-DATA = tuple('csv ini json plist xml yaml yml'.split())
-SCRIPTS = tuple('js php pl py rb sh'.split())
-ARCHIVES = tuple('gz bz2 zip tar tgz txz 7z'.split())
-EXECUTABLES = tuple('so exe dll'.split())
-DEFAULT = DOCUMENTS + TEXT + IMAGES + DATA
-
-GROUPS = dict((
-    ('documents', DOCUMENTS),
-    ('text', TEXT),
-    ('images', IMAGES),
-    ('audio', AUDIO),
-    ('video', VIDEO),
-    ('data', DATA),
-    ('scripts', SCRIPTS),
-    ('archives', ARCHIVES),
-    ('executables', EXECUTABLES),
-    ('default', DEFAULT)
-))
-
-_filename_ascii_strip_re = re.compile(r'[^A-Za-z0-9_.-]')
-_windows_device_files = ('CON', 'AUX', 'COM1', 'COM2', 'COM3', 'COM4', 'LPT1',
-                         'LPT2', 'LPT3', 'PRN', 'NUL')
-
-
-def secure_filename(filename):
-    """
-    This is a port of :meth:`werkzeug.utils.secure_filename` with
-    python 3.2 compatibility.
-
-    :param filename: the filename to secure
-    """
-    if isinstance(filename, _compat.text_type):
-        filename = unicodedata.normalize(
-            'NFKD', filename).encode('ascii', 'ignore')
-        if _compat.PY3:
-            filename = filename.decode('ascii')
-    for sep in os.path.sep, os.path.altsep:
-        if sep:
-            filename = filename.replace(sep, ' ')
-    filename = str(_filename_ascii_strip_re.sub('', '_'.join(
-                   filename.split()))).strip('._')
-
-    # on nt a couple of special files are present in each folder. We
-    # have to ensure that the target file is not such a filename. In
-    # this case we prepend an underline
-    if (os.name == 'nt' and filename and
-       filename.split('.')[0].upper() in _windows_device_files):
-        filename = '_' + filename
-
-    return filename
-
-
-def resolve_extensions(extensions):
-    """
-    Splits extensions string into a set of extensions
-    ("jpg", "png" etc). If extensions string contains
-    a known group e.g. "images" then fetches extensions
-    for that group. Separate groups with "+".
-
-    :param extensions: a string of extensions and/or group names
-    """
-    rv = set()
-    groups = extensions.split('+')
-    for group in groups:
-        if group in GROUPS:
-            rv.update(GROUPS[group])
-        else:
-            for ext in group.split():
-                rv.add(ext.lower())
-    return rv
-
-
-def random_filename(filename):
-    """Generates a randomized (uuid4) filename,
-    preserving the original extension.
-
-    :param filename: the original filename
-    """
-    _, ext = os.path.splitext(filename)
-    return str(uuid.uuid4()) + ext.lower()
 
 
 @implementer(IFileStorage)
@@ -218,7 +129,7 @@ class FileStorage(object):
         if not self.file_allowed(fs, extensions):
             raise FileNotAllowed()
 
-        filename = secure_filename(
+        filename = utils.secure_filename(
             os.path.basename(fs.filename)
         )
 
@@ -231,7 +142,7 @@ class FileStorage(object):
             os.makedirs(dest_folder)
 
         if randomize:
-            filename = random_filename(filename)
+            filename = utils.random_filename(filename)
 
         filename, path = self.resolve_name(filename, dest_folder)
 

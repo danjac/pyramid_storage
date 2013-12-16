@@ -1,7 +1,7 @@
 pyramid_storage
 ===============
 
-**pyramid_storage** is a simple file upload manager for the Pyramid framework.
+**pyramid_storage** is a simple file upload manager for the `Pyramid`_ framework.
 
 Installation
 -------------
@@ -11,7 +11,7 @@ Install with **pip install pyramid_storage**. To install from source, unzip/tar,
 Bugs and issues
 ---------------
 
-Please report bugs and issues (and better still, pull requests) on the Github repo.
+Please report bugs and issues (and better still, pull requests) on the `Github`_ repo.
 
 Getting started
 ---------------
@@ -204,3 +204,4 @@ API
    :members:
 
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
+.. _Github: https://github.com/danjac/pyramid_storage

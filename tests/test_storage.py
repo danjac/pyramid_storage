@@ -23,35 +23,6 @@ def _mock_open(name='test', mode='wb'):
     return obj
 
 
-def test_resolve_extensions_if_individuals():
-    from pyramid_storage import storage
-    extensions = storage.resolve_extensions('txt jpg')
-    assert 'jpg' in extensions
-    assert 'txt' in extensions
-
-
-def test_resolve_extensions_if_known_group():
-    from pyramid_storage import storage
-    extensions = storage.resolve_extensions('images')
-    assert 'jpg' in extensions
-
-
-def test_resolve_extensions_if_two_groups():
-    from pyramid_storage import storage
-    extensions = storage.resolve_extensions('images+video')
-    assert 'jpg' in extensions
-    assert 'wmv' in extensions
-
-
-def test_resolve_extensions_if_mix():
-    from pyramid_storage import storage
-    extensions = storage.resolve_extensions('images+video+txt doc')
-    assert 'jpg' in extensions
-    assert 'wmv' in extensions
-    assert 'txt' in extensions
-    assert 'doc' in extensions
-
-
 def test_extension_allowed_if_allowed_if_dotted():
     from pyramid_storage import storage
     assert storage.FileStorage("").extension_allowed(".jpg", ("jpg",))
@@ -99,7 +70,7 @@ def test_save_if_file_not_allowed():
 
 
 def test_save_if_file_allowed():
-    from pyramid_storage import storage, _compat
+    from pyramid_storage import storage
 
     fs = mock.Mock()
     fs.filename = "test.jpg"
@@ -172,13 +143,6 @@ def test_save_in_folder():
 
     for patch in patches:
         patch.stop()
-
-
-def test_random_filename():
-    from pyramid_storage import storage
-    filename = storage.random_filename("my little pony.png")
-    assert filename.endswith(".png")
-    assert filename != "my little pony.png"
 
 
 def test_url():
@@ -268,19 +232,3 @@ def test_from_settings_if_base_path_missing():
 
     with pytest.raises(ValueError):
         storage.FileStorage.from_settings({}, 'storage.')
-
-
-def test_secure_filename():
-
-    from pyramid_storage import _compat
-    from pyramid_storage.storage import secure_filename
-    assert secure_filename('My cool movie.mov') == 'My_cool_movie.mov'
-    assert secure_filename('../../../etc/passwd') == 'etc_passwd'
-
-    if _compat.PY3:
-        target = 'i_contain_cool_umlauts.txt'
-    else:
-        target = 'i_contain_cool_mluts.txt'
-
-    assert secure_filename(
-        'i contain cool \xfcml\xe4uts.txt') == target
