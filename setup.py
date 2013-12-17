@@ -2,8 +2,6 @@
 Links
 `````
 
-* `documentation
-  <http://docs.pylonsproject.org/projects/pyramid_storage/en/latest/>`_
 * `development version
   <https://github.com/danjac/pyramid_storage>`_
 
