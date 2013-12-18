@@ -1,0 +1,4 @@
+0.0.2
+=====
+
+Version bump to include setup.cfg and sphinx conf changes.
