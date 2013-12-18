@@ -17,5 +17,6 @@ data
 build
 tests/__pycache__
 docs/output
+docs/build
 docs/_build
 *\$py.class

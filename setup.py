@@ -1,6 +1,8 @@
 """
 Links
 `````
+* `documentation
+  <http://pythonhosted.org/pyramid_storage/>`_
 * `development version
   <https://github.com/danjac/pyramid_storage>`_
 
@@ -40,7 +42,7 @@ tests_require = [
 setup(
     name='pyramid_storage',
     cmdclass={'test': PyTest},
-    version='0.0.1',
+    version='0.0.2',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
