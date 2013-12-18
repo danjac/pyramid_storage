@@ -1,7 +1,6 @@
 """
 Links
 `````
-
 * `development version
   <https://github.com/danjac/pyramid_storage>`_
 
