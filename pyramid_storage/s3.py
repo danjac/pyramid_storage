@@ -2,16 +2,11 @@
 
 import os
 import mimetypes
-import boto.s3.connection
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 from pyramid import compat
 from pyramid.decorator import reify
 from zope.interface import implementer
+from boto.s3.connection import S3Connection
 
 from . import utils
 from .exceptions import FileNotAllowed
@@ -38,7 +33,7 @@ class S3FileStorage(object):
                    secret_key=settings[prefix + 'aws.secret_key'],
                    bucket_name=settings[prefix + 'aws.bucket'],
                    acl=settings.get(prefix + 'aws.default_acl', 'public-read'),
-                   base_url=settings.get('base_url', ''),
+                   base_url=settings.get('base_url', None),
                    extensions=settings.get(prefix + 'extensions', 'default'))
 
     def __init__(self, access_key, secret_key, bucket_name,
@@ -47,11 +42,12 @@ class S3FileStorage(object):
         self.secret_key = secret_key
         self.bucket_name = bucket_name
         self.acl = acl
-        self.base_url = base_url
+        self.base_url = (
+            base_url or '//s3.amazonaws.com/%s' % self.bucket_name)
         self.extensions = resolve_extensions(extensions)
 
     def get_connection(self):
-        return boto.s3.Connection(self.access_key, self.secret_key)
+        return S3Connection(self.access_key, self.secret_key)
 
     @reify
     def bucket(self):
@@ -98,20 +94,19 @@ class S3FileStorage(object):
         return ext.lower() in extensions
 
     def save(self, fs, folder=None, randomize=False, extensions=None,
-             acl=None):
+             acl=None, replace=False):
         """Saves contents of a **cgi.FileStorage** object to the file system.
-        Returns modified filename(including folder). If there is a clash
-        with an existing filename then filename
-        will be resolved accordingly. If path directories do not exist
-        they will be created.
+        Returns modified filename(including folder).
 
-        Returns the resolved filename, i.e. the folder +
-        the (randomized/incremented) base name.
+        Returns the resolved filename, i.e. the folder + (modified/randomized)
+        filename.
 
         :param fs: **cgi.FileStorage** object (or similar)
         :param folder: relative path of sub-folder
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
+        :param acl: ACL policy (if None then uses default)
+        :param replace: replace existing key
         """
 
         acl = acl or self.acl
@@ -140,19 +135,10 @@ class S3FileStorage(object):
         key.set_metadata('Content-Type', content_type)
 
         fs.file.seek(0)
-        fp = StringIO()
 
-        while True:
-            chunk = fs.file.read(2 << 16)
-            if not chunk:
-                break
-            fp.write(chunk)
-
-        content = fp.get_value()
-
-        key.set_content_from_file(content,
-                                  headers=headers,
-                                  policy=acl,
-                                  rewind=True)
+        key.set_contents_from_file(fs.file,
+                                   headers=headers,
+                                   policy=acl,
+                                   rewind=True)
 
         return filename
