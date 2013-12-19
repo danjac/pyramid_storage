@@ -1,9 +1,9 @@
 from .interfaces import IFileStorage
 
 
-def register_file_storage_impl_factory(config, factory):
+def register_file_storage_impl(config, impl):
 
-    config.registry.registerUtility(factory, IFileStorage)
+    config.registry.registerUtility(impl, IFileStorage)
     name = config.registry.settings.get('storage.name', 'storage')
     config.add_request_method(get_file_storage_impl, name, True)
 

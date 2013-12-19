@@ -10,16 +10,16 @@ from . import utils
 from .extensions import resolve_extensions
 from .exceptions import FileNotAllowed
 from .interfaces import IFileStorage
-from .registry import register_file_storage_impl_factory
+from .registry import register_file_storage_impl
 
 
 def includeme(config):
 
-    factory = LocalFileStorage.from_settings(
+    impl = LocalFileStorage.from_settings(
         config.registry.settings, prefix='storage.'
     )
 
-    register_file_storage_impl_factory(config, factory)
+    register_file_storage_impl(config, impl)
 
 
 @implementer(IFileStorage)

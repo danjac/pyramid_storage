@@ -17,16 +17,16 @@ from . import utils
 from .exceptions import FileNotAllowed
 from .extensions import resolve_extensions
 from .interfaces import IFileStorage
-from .registry import register_file_storage_impl_factory
+from .registry import register_file_storage_impl
 
 
 def includeme(config):
 
-    factory = S3FileStorage.from_settings(
+    impl = S3FileStorage.from_settings(
         config.registry.settings, prefix='storage.'
     )
 
-    register_file_storage_impl_factory(config, factory)
+    register_file_storage_impl(config, impl)
 
 
 @implementer(IFileStorage)
@@ -38,11 +38,11 @@ class S3FileStorage(object):
                    secret_key=settings[prefix + 'aws.secret_key'],
                    bucket_name=settings[prefix + 'aws.bucket'],
                    acl=settings.get(prefix + 'aws.default_acl', 'public-read'),
-                   base_url=settings.get('base_url'),
+                   base_url=settings.get('base_url', ''),
                    extensions=settings.get(prefix + 'extensions', 'default'))
 
     def __init__(self, access_key, secret_key, bucket_name,
-                 acl=None, base_url=None, extensions='default'):
+                 acl=None, base_url='', extensions='default'):
         self.access_key = access_key
         self.secret_key = secret_key
         self.bucket_name = bucket_name
@@ -141,6 +141,7 @@ class S3FileStorage(object):
 
         fs.file.seek(0)
         fp = StringIO()
+
         while True:
             chunk = fs.file.read(2 << 16)
             if not chunk:

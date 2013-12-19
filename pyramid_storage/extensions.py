@@ -41,5 +41,3 @@ def resolve_extensions(extensions):
             for ext in group.split():
                 rv.add(ext.lower())
     return rv
-
-
