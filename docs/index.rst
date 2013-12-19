@@ -32,8 +32,20 @@ Alternatively you can use :meth:`pyramid.config.Configurator.include` in your ap
 Either setup will add an instance of :class:`pyramid_storage.storage.FileStorage` to your app registry. The instance
 will also be available as a property of your request as **request.storage**.
 
+To use S3 file storage instead of storing files locally on your server (the default assumption)::
+
+    pyramid.includes = 
+        pyramid_storage.s3
+
+alternatively::
+
+    config.include('pyramid_storage.s3')
+
+
 Configuration
 -------------
+
+Local file storage (default)
 
 The available settings are listed below:
 
@@ -45,6 +57,21 @@ Setting                Default                Description
 **extensions**         ``default``            List of extensions or extension groups (see below)
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**
 ==============         =================      ==================================================================
+
+S3 file storage
+
+===================    =================      ==================================================================
+Setting                Default                Description
+===================    =================      ==================================================================
+**aws.access_key**
+**aws.secret_key**
+**aws.bucket_name**
+**aws.acl**
+**base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
+**extensions**         ``default``            List of extensions or extension groups (see below)
+**name**               ``storage``            Name of property added to request, e.g. **request.storage**
+===================    =================      ==================================================================
+
 
 **Configuring extensions:** extensions are given as a list of space-separated extensions or groups of extensions. These groups provide a convenient
 shortcut for including a large number of extensions. Each group must be separated by a plus-sign "+". Some examples:
@@ -72,8 +99,8 @@ default         documents+images+text+data
 ============    ==========================================
 
 
-Usage
------
+Usage: local file storage
+-------------------------
 
 .. warning::
     It is the responsibility of the deployment team to ensure that target directories used in file uploads have the appropriate read/write permissions.
@@ -157,6 +184,13 @@ You may not wish to provide public access to files - for example users may uploa
         filename = request.params['filename']
         return FileResponse(request.storage.path(filename))
 
+Usage: s3 file storage
+-------------------------
+
+.. warning::
+    It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
+
+
 
 Testing
 -------
@@ -195,9 +229,14 @@ API
 
 .. autoclass:: FileNotAllowed
 
-.. module:: pyramid_storage.storage
+.. module:: pyramid_storage.local
 
-.. autoclass:: FileStorage
+.. autoclass:: LocalFileStorage
+   :members:
+
+.. module:: pyramid_storage.s3
+
+.. autoclass:: S3FileStorage
    :members:
 
 .. autoclass:: DummyFileStorage

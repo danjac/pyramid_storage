@@ -4,7 +4,6 @@ import os
 import mimetypes
 
 from pyramid import compat
-from pyramid.decorator import reify
 from zope.interface import implementer
 from boto.s3.connection import S3Connection
 
@@ -49,8 +48,7 @@ class S3FileStorage(object):
     def get_connection(self):
         return S3Connection(self.access_key, self.secret_key)
 
-    @reify
-    def bucket(self):
+    def get_bucket(self):
         return self.get_connection().get_bucket(self.bucket_name)
 
     def url(self, filename):
@@ -61,7 +59,7 @@ class S3FileStorage(object):
         return compat.urlparse.urljoin(self.base_url, filename)
 
     def exists(self, filename):
-        return self.bucket.new_key(filename).exists()
+        return self.get_bucket().new_key(filename).exists()
 
     def delete(self, filename):
         """Deletes the filename. Filename is resolved with the
@@ -70,7 +68,7 @@ class S3FileStorage(object):
 
         :param filename: base name of file
         """
-        self.bucket.delete_key(filename)
+        self.get_bucket().delete_key(filename)
 
     def file_allowed(self, fs, extensions=None):
         """Checks if a file can be saved, based on extensions
@@ -94,7 +92,7 @@ class S3FileStorage(object):
         return ext.lower() in extensions
 
     def save(self, fs, folder=None, randomize=False, extensions=None,
-             acl=None, replace=False):
+             acl=None, replace=False, headers=None):
         """Saves contents of a **cgi.FileStorage** object to the file system.
         Returns modified filename(including folder).
 
@@ -107,9 +105,11 @@ class S3FileStorage(object):
         :param extensions: iterable of allowed extensions, if not default
         :param acl: ACL policy (if None then uses default)
         :param replace: replace existing key
+        :param headers: dict of s3 request headers
         """
 
         acl = acl or self.acl
+        headers = headers or {}
         extensions = extensions or self.extensions
 
         if not self.file_allowed(fs, extensions):
@@ -127,11 +127,12 @@ class S3FileStorage(object):
 
         content_type, _ = mimetypes.guess_type(filename)
 
-        headers = {
+        headers.update({
             'Content-Type': content_type,
-        }
+        })
 
-        key = self.bucket.get_key(filename) or self.bucket.new_key(filename)
+        key = self.get_bucket().get_key(
+            filename) or self.bucket.new_key(filename)
         key.set_metadata('Content-Type', content_type)
 
         fs.file.seek(0)
