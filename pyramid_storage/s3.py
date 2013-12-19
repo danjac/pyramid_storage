@@ -5,7 +5,6 @@ import mimetypes
 
 from pyramid import compat
 from zope.interface import implementer
-from boto.s3.connection import S3Connection
 
 from . import utils
 from .exceptions import FileNotAllowed
@@ -32,7 +31,7 @@ class S3FileStorage(object):
                    secret_key=settings[prefix + 'aws.secret_key'],
                    bucket_name=settings[prefix + 'aws.bucket'],
                    acl=settings.get(prefix + 'aws.default_acl', 'public-read'),
-                   base_url=settings.get('base_url', None),
+                   base_url=settings.get('base_url', ''),
                    extensions=settings.get(prefix + 'extensions', 'default'))
 
     def __init__(self, access_key, secret_key, bucket_name,
@@ -41,11 +40,13 @@ class S3FileStorage(object):
         self.secret_key = secret_key
         self.bucket_name = bucket_name
         self.acl = acl
-        self.base_url = (
-            base_url or '//s3.amazonaws.com/%s' % self.bucket_name)
         self.extensions = resolve_extensions(extensions)
 
     def get_connection(self):
+        try:
+            from boto.s3.connection import S3Connection
+        except ImportError:
+            raise RuntimeError("You must have boto installed to use s3")
         return S3Connection(self.access_key, self.secret_key)
 
     def get_bucket(self):

@@ -56,7 +56,6 @@ setup(
     platforms='any',
     install_requires=[
         'pyramid',
-        'werkzeug',
     ],
     tests_require=tests_require,
     extras_require={
