@@ -1,3 +1,8 @@
+0.0.3
+=====
+
+Added PDF to document extensions list
+
 0.0.2
 =====
 
