@@ -13,6 +13,7 @@ env
 tags
 ptags
 build
+dist
 htmlcov
 *.log
 .tags

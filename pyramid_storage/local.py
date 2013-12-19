@@ -10,12 +10,23 @@ from . import utils
 from .extensions import resolve_extensions
 from .exceptions import FileNotAllowed
 from .interfaces import IFileStorage
+from .registry import register_file_storage_impl_factory
+
+
+def includeme(config):
+
+    factory = LocalFileStorage.from_settings(
+        config.registry.settings, prefix='storage.'
+    )
+
+    register_file_storage_impl_factory(config, factory)
 
 
 @implementer(IFileStorage)
-class FileStorage(object):
+class LocalFileStorage(object):
 
-    """Manages storage and retrieval of file uploads.
+    """Manages storage and retrieval of file uploads to local
+    filesystem on server.
 
     :param base_path: the absolute base path where uploads are stored
     :param base_url: absolute or relative base URL for uploads
@@ -171,18 +182,3 @@ class FileStorage(object):
                 return name, path
             counter += 1
             name = '%s-%d%s' % (basename, counter, ext)
-
-
-class DummyFileStorage(object):
-    """A fake file storage object for testing. Instead of
-    saving to file the filename is added to a list"""
-
-    def __init__(self):
-        self.saved = []
-
-    def save(self, fs, folder=None, *args, **kwargs):
-        """Performs a fake saved operation"""
-        filename = fs.filename
-        name = os.path.join(folder or '', filename)
-        self.saved.append(name)
-        return name
