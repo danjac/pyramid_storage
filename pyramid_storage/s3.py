@@ -75,7 +75,7 @@ class S3FileStorage(object):
     def file_allowed(self, fs, extensions=None):
         """Checks if a file can be saved, based on extensions
 
-        :param fs: **cgi.FileStorage** object or similar
+        :param fs: **cgi.FieldStorage** object or similar
         :param extensions: iterable of extensions (or self.extensions)
         """
         _, ext = os.path.splitext(fs.filename)
@@ -95,13 +95,13 @@ class S3FileStorage(object):
 
     def save(self, fs, folder=None, randomize=False, extensions=None,
              acl=None, replace=False, headers=None):
-        """Saves contents of a **cgi.FileStorage** object to the file system.
+        """Saves contents of a **cgi.FieldStorage** object to the file system.
         Returns modified filename(including folder).
 
         Returns the resolved filename, i.e. the folder + (modified/randomized)
         filename.
 
-        :param fs: **cgi.FileStorage** object (or similar)
+        :param fs: **cgi.FieldStorage** object (or similar)
         :param folder: relative path of sub-folder
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
