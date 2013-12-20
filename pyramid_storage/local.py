@@ -98,14 +98,18 @@ class LocalFileStorage(object):
         """
         return os.path.exists(self.path(filename))
 
+    def filename_allowed(self, filename, extensions=None):
+
+        _, ext = os.path.splitext(filename)
+        return self.extension_allowed(ext, extensions)
+
     def file_allowed(self, fs, extensions=None):
         """Checks if a file can be saved, based on extensions
 
         :param fs: **cgi.FieldStorage** object or similar
         :param extensions: iterable of extensions (or self.extensions)
         """
-        _, ext = os.path.splitext(fs.filename)
-        return self.extension_allowed(ext, extensions)
+        return self.filename_allowed(fs.filename)
 
     def extension_allowed(self, ext, extensions=None):
         """Checks if an extension is permitted. Both e.g. ".jpg" and
@@ -119,7 +123,7 @@ class LocalFileStorage(object):
             ext = ext[1:]
         return ext.lower() in extensions
 
-    def save(self, fs, folder=None, randomize=False, extensions=None):
+    def save(self, fs, *args, **kwargs):
         """Saves contents of a **cgi.FieldStorage** object to the file system.
         Returns modified filename(including folder). If there is a clash
         with an existing filename then filename
@@ -134,14 +138,21 @@ class LocalFileStorage(object):
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
         """
+        return self.save_file(fs.file, fs.filename, *args, **kwargs)
+
+    def save_filename(self, filename, *args, **kwargs):
+        return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
+
+    def save_file(self, file, filename, folder=None, randomize=False,
+                  extensions=None):
 
         extensions = extensions or self.extensions
 
-        if not self.file_allowed(fs, extensions):
+        if not self.filename_allowed(filename, extensions):
             raise FileNotAllowed()
 
         filename = utils.secure_filename(
-            os.path.basename(fs.filename)
+            os.path.basename(filename)
         )
 
         if folder:
@@ -157,10 +168,10 @@ class LocalFileStorage(object):
 
         filename, path = self.resolve_name(filename, dest_folder)
 
-        fs.file.seek(0)
+        file.seek(0)
 
         with open(path, "wb") as dest:
-            shutil.copyfileobj(fs.file, dest)
+            shutil.copyfileobj(file, dest)
 
         if folder:
             filename = os.path.join(folder, filename)
