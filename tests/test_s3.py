@@ -120,6 +120,49 @@ def test_save_if_file_allowed():
     assert name == "test.jpg"
 
 
+def test_save_file():
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+        name = s.save_file(mock.Mock(), "test.jpg")
+    assert name == "test.jpg"
+
+
+def test_save_filename():
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    patches = (
+        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection
+        )
+    )
+
+    for patch in patches:
+        patch.start()
+
+    name = s.save_filename("test.jpg")
+    assert name == "test.jpg"
+
+    for patch in patches:
+        patch.stop()
+
+
 def test_save_if_randomize():
     from pyramid_storage import s3
 

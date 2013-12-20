@@ -96,6 +96,50 @@ def test_save_if_file_allowed():
         patch.stop()
 
 
+def test_save_file():
+    from pyramid_storage import local
+
+    s = local.LocalFileStorage("uploads", extensions="images")
+
+    patches = (
+        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch("os.path.exists", lambda p: False),
+        mock.patch("os.makedirs", lambda p: True),
+        mock.patch("shutil.copyfileobj", lambda x, y: True),
+    )
+
+    for patch in patches:
+        patch.start()
+
+    name = s.save_file(mock.Mock(), "test.jpg")
+    assert name == "test.jpg"
+
+    for patch in patches:
+        patch.stop()
+
+
+def test_save_filename():
+    from pyramid_storage import local
+
+    s = local.LocalFileStorage("uploads", extensions="images")
+
+    patches = (
+        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch("os.path.exists", lambda p: False),
+        mock.patch("os.makedirs", lambda p: True),
+        mock.patch("shutil.copyfileobj", lambda x, y: True),
+    )
+
+    for patch in patches:
+        patch.start()
+
+    name = s.save_filename("test.jpg")
+    assert name == "test.jpg"
+
+    for patch in patches:
+        patch.stop()
+
+
 def test_save_if_randomize():
     from pyramid_storage import local
 
