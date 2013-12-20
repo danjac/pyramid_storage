@@ -1,7 +1,7 @@
 pyramid_storage
 ===============
 
-**pyramid_storage** is a simple file upload manager for the `Pyramid`_ framework.
+**pyramid_storage** is a simple file upload manager for the `Pyramid`_ framework. It currently supports uploads to the local file system and to the Amazon S3 cloud storage service.
 
 Installation
 -------------

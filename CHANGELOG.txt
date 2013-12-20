@@ -1,9 +1,14 @@
-0.0.3
-=====
+0.0.4 (2012-12-20)
+==================
+
+Added S3 functionality
+
+0.0.3 (2012-12-18)
+==================
 
 Added PDF to document extensions list
 
-0.0.2
-=====
+0.0.2 (2012-12-17)
+==================
 
 Version bump to include setup.cfg and sphinx conf changes.
