@@ -221,10 +221,6 @@ This class stores the names of the files internally for your assertions in the *
 API
 ---
 
-.. module:: pyramid_storage
-
-.. autofunction:: get_file_storage
-
 .. module:: pyramid_storage.exceptions
 
 .. autoclass:: FileNotAllowed
@@ -238,6 +234,8 @@ API
 
 .. autoclass:: S3FileStorage
    :members:
+
+.. module:: pyramid_storage.testing
 
 .. autoclass:: DummyFileStorage
    :members:

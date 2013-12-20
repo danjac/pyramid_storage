@@ -107,6 +107,7 @@ class S3FileStorage(object):
         :param acl: ACL policy (if None then uses default)
         :param replace: replace existing key
         :param headers: dict of s3 request headers
+        :returns: modified filename
         """
 
         acl = acl or self.acl
@@ -141,6 +142,7 @@ class S3FileStorage(object):
         key.set_contents_from_file(fs.file,
                                    headers=headers,
                                    policy=acl,
+                                   replace=replace,
                                    rewind=True)
 
         return filename

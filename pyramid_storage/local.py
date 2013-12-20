@@ -171,9 +171,11 @@ class LocalFileStorage(object):
         """Resolves a unique name and the correct path. If a filename
         for that path already exists then a numeric prefix will be
         added, for example test.jpg -> test-1.jpg etc.
+
         :param name: base name of file
         :param folder: absolute folder path
         """
+
         basename, ext = os.path.splitext(name)
         counter = 0
         while True:

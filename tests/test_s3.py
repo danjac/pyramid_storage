@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import os
 import mock
 import pytest
 
 from pyramid import compat
+
+
+class MockS3Connection(object):
+
+    def get_bucket(self, bucket_name):
+        return mock.Mock()
+
+
+def _get_mock_s3_connection(self):
+    return MockS3Connection()
 
 
 def _mock_open_name():
@@ -90,3 +99,78 @@ def test_save_if_file_not_allowed():
 
     with pytest.raises(FileNotAllowed):
         s.save(fs)
+
+
+def test_save_if_file_allowed():
+    from pyramid_storage import s3
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+        name = s.save(fs)
+    assert name == "test.jpg"
+
+
+def test_save_if_randomize():
+    from pyramid_storage import s3
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+        name = s.save(fs, randomize=True)
+    assert name != "test.jpg"
+
+
+def test_save_in_folder():
+
+    from pyramid_storage import s3
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+        name = s.save(fs, folder="my_folder")
+    assert name == "my_folder/test.jpg"
+
+
+def test_delete():
+
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+
+        s.delete("test.jpg")
