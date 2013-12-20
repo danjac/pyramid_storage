@@ -73,7 +73,11 @@ class S3FileStorage(object):
         self.get_bucket().delete_key(filename)
 
     def filename_allowed(self, filename, extensions=None):
+        """Checks if a filename has an allowed extension
 
+        :param filename: base name of file
+        :param extensions: iterable of extensions (or self.extensions)
+        """
         _, ext = os.path.splitext(filename)
         return self.extension_allowed(ext, extensions)
 
@@ -116,11 +120,35 @@ class S3FileStorage(object):
         return self.save_file(fs.file, fs.filename, *args, **kwargs)
 
     def save_filename(self, filename, *args, **kwargs):
+        """Saves a filename in local filesystem to the uploads location.
+
+        Returns the resolved filename, i.e. the folder +
+        the (randomized/incremented) base name.
+
+        :param filename: local filename
+        :param folder: relative path of sub-folder
+        :param randomize: randomize the filename
+        :param extensions: iterable of allowed extensions, if not default
+        :param acl: ACL policy (if None then uses default)
+        :param replace: replace existing key
+        :param headers: dict of s3 request headers
+        :returns: modified filename
+        """
+
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
     def save_file(self, file, filename, folder=None, randomize=False,
                   extensions=None, acl=None, replace=False, headers=None):
-
+        """
+        :param filename: local filename
+        :param folder: relative path of sub-folder
+        :param randomize: randomize the filename
+        :param extensions: iterable of allowed extensions, if not default
+        :param acl: ACL policy (if None then uses default)
+        :param replace: replace existing key
+        :param headers: dict of s3 request headers
+        :returns: modified filename
+        """
         acl = acl or self.acl
         headers = headers or {}
         extensions = extensions or self.extensions

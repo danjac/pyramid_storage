@@ -99,8 +99,11 @@ class LocalFileStorage(object):
         return os.path.exists(self.path(filename))
 
     def filename_allowed(self, filename, extensions=None):
-        """Checks if a filename has an allowed extension"""
+        """Checks if a filename has an allowed extension
 
+        :param filename: base name of file
+        :param extensions: iterable of extensions (or self.extensions)
+        """
         _, ext = os.path.splitext(filename)
         return self.extension_allowed(ext, extensions)
 
@@ -138,6 +141,7 @@ class LocalFileStorage(object):
         :param folder: relative path of sub-folder
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
+        :returns: modified filename
         """
         return self.save_file(fs.file, fs.filename, *args, **kwargs)
 
@@ -147,10 +151,11 @@ class LocalFileStorage(object):
         Returns the resolved filename, i.e. the folder +
         the (randomized/incremented) base name.
 
-        :param fs: **cgi.FieldStorage** object (or similar)
+        :param filename: local filename
         :param folder: relative path of sub-folder
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
+        :returns: modified filename
         """
 
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
@@ -162,10 +167,11 @@ class LocalFileStorage(object):
         the (randomized/incremented) base name.
 
         :param fs: **cgi.FieldStorage** object (or similar)
+        :param filename: original filename
         :param folder: relative path of sub-folder
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
-
+        :returns: modified filename
         """
 
         extensions = extensions or self.extensions
