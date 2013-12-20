@@ -31,7 +31,7 @@ class S3FileStorage(object):
                    secret_key=settings[prefix + 'aws.secret_key'],
                    bucket_name=settings[prefix + 'aws.bucket'],
                    acl=settings.get(prefix + 'aws.default_acl', 'public-read'),
-                   base_url=settings.get('base_url', ''),
+                   base_url=settings.get(prefix + 'base_url', ''),
                    extensions=settings.get(prefix + 'extensions', 'default'))
 
     def __init__(self, access_key, secret_key, bucket_name,
@@ -40,6 +40,7 @@ class S3FileStorage(object):
         self.secret_key = secret_key
         self.bucket_name = bucket_name
         self.acl = acl
+        self.base_url = base_url
         self.extensions = resolve_extensions(extensions)
 
     def get_connection(self):
@@ -133,8 +134,9 @@ class S3FileStorage(object):
             'Content-Type': content_type,
         })
 
-        key = self.get_bucket().get_key(
-            filename) or self.bucket.new_key(filename)
+        bucket = self.get_bucket()
+
+        key = bucket.get_key(filename) or bucket.new_key(filename)
         key.set_metadata('Content-Type', content_type)
 
         fs.file.seek(0)

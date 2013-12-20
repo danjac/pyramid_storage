@@ -45,7 +45,7 @@ alternatively::
 Configuration
 -------------
 
-Local file storage (default)
+**Local file storage (default)**
 
 The available settings are listed below:
 
@@ -58,15 +58,15 @@ Setting                Default                Description
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**
 ==============         =================      ==================================================================
 
-S3 file storage
+**S3 file storage**
 
 ===================    =================      ==================================================================
 Setting                Default                Description
 ===================    =================      ==================================================================
-**aws.access_key**
-**aws.secret_key**
-**aws.bucket_name**
-**aws.acl**
+**aws.access_key**     **required**           AWS access key
+**aws.secret_key**     **required**           AWS secret key
+**aws.bucket_name**    **required**           AWS bucket
+**aws.acl**            ``public-read``        AWS ACL permissions
 **base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
 **extensions**         ``default``            List of extensions or extension groups (see below)
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**
@@ -190,7 +190,33 @@ Usage: s3 file storage
 .. warning::
     It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
 
+Basic usage is similar to **LocalFileStorage**::
 
+    from pyramid.view import view_config
+    from pyramid.httpexceptions import HTTPSeeOther
+
+    @view_config(route_name='upload',
+                 request_method='POST')
+    def upload(request):
+        request.storage.save(request.POST['my_file'])
+        return HTTPSeeOther(request.route_url('home'))
+
+
+One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips. Instead you can pass the ``replace`` argument to replace the file on s3 (default is **False**)::
+
+
+    from pyramid.view import view_config
+    from pyramid.httpexceptions import HTTPSeeOther
+
+    @view_config(route_name='upload',
+                 request_method='POST')
+    def upload(request):
+        request.storage.save(request.POST['my_file'], replace=True)
+        return HTTPSeeOther(request.route_url('home'))
+
+Alternatively you can use the ``randomize`` argument to ensure a (near) unique filename.
+
+The  ``storage.base_url`` setting should be set to ``//s3amazonaws.com/<my-bucket-name>/`` unless you want to serve the file behind a proxy or through your Pyramid application.
 
 Testing
 -------
