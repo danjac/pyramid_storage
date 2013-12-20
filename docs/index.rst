@@ -3,6 +3,7 @@ pyramid_storage
 
 **pyramid_storage** is a simple file upload manager for the `Pyramid`_ framework. It currently supports uploads to the local file system and to the Amazon S3 cloud storage service.
 
+
 Installation
 -------------
 
@@ -188,6 +189,9 @@ Usage: s3 file storage
 -------------------------
 
 .. warning::
+    S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto``). As of writing this library is not Python 3 compatible.
+
+.. warning::
     It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
 
 Basic usage is similar to **LocalFileStorage**::
@@ -266,5 +270,6 @@ API
 .. autoclass:: DummyFileStorage
    :members:
 
+.. _Boto: http://pypi.python.org/pypi/boto/
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _Github: https://github.com/danjac/pyramid_storage
