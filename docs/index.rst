@@ -248,6 +248,9 @@ This class stores the names of the files internally for your assertions in the *
         assert 'test.jpg' in req.storage.saved
 
 
+Not that *DummyFileStorage* only provides one or two convenience methods. You may wish to extend this class for your own specific needs.
+
+
 API
 ---
 

@@ -113,7 +113,7 @@ class LocalFileStorage(object):
         :param fs: **cgi.FieldStorage** object or similar
         :param extensions: iterable of extensions (or self.extensions)
         """
-        return self.filename_allowed(fs.filename)
+        return self.filename_allowed(fs.filename, extensions)
 
     def extension_allowed(self, ext, extensions=None):
         """Checks if an extension is permitted. Both e.g. ".jpg" and
