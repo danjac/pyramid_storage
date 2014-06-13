@@ -167,6 +167,7 @@ class S3FileStorage(object):
             filename = folder + "/" + filename
 
         content_type, _ = mimetypes.guess_type(filename)
+        content_type = content_type or 'application/octet-stream'
 
         headers.update({
             'Content-Type': content_type,
