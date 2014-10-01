@@ -31,7 +31,7 @@ docs_extras = [
     'Sphinx',
     'docutils',
     'repoze.sphinx.autointerface',
-    ]
+]
 
 tests_require = [
     'pytest',
@@ -42,7 +42,7 @@ tests_require = [
 setup(
     name='pyramid_storage',
     cmdclass={'test': PyTest},
-    version='0.0.7',
+    version='0.0.8',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
@@ -60,7 +60,7 @@ setup(
     tests_require=tests_require,
     extras_require={
         'docs': docs_extras,
-        },
+    },
     test_suite='pyramid_storage',
     classifiers=[
         'Intended Audience :: Developers',

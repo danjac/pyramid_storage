@@ -123,6 +123,8 @@ class LocalFileStorage(object):
         """
 
         extensions = extensions or self.extensions
+        if not extensions:
+            return True
         if ext.startswith('.'):
             ext = ext[1:]
         return ext.lower() in extensions

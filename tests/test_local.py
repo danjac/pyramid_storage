@@ -24,6 +24,12 @@ def _mock_open(name='test', mode='wb'):
     return obj
 
 
+def test_extension_allowed_if_any():
+    from pyramid_storage import local
+    assert local.LocalFileStorage(
+        "", extensions='any').extension_allowed(".jpg")
+
+
 def test_extension_allowed_if_allowed_if_dotted():
     from pyramid_storage import local
     assert local.LocalFileStorage("").extension_allowed(".jpg", ("jpg",))

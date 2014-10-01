@@ -1,3 +1,4 @@
+ANY = ()
 TEXT = ('txt',)
 DOCUMENTS = tuple('pdf rtf odf ods gnumeric abw doc docx xls xls'.split())
 IMAGES = tuple('jpg jpe jpeg png gif svg bmp tiff'.split())
@@ -19,7 +20,8 @@ GROUPS = dict((
     ('scripts', SCRIPTS),
     ('archives', ARCHIVES),
     ('executables', EXECUTABLES),
-    ('default', DEFAULT)
+    ('default', DEFAULT),
+    ('any', ANY),
 ))
 
 

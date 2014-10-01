@@ -33,6 +33,15 @@ def _mock_open(name='test', mode='wb'):
     return obj
 
 
+def test_extension_allowed_if_any():
+    from pyramid_storage import s3
+    s = s3.S3FileStorage(access_key="AK",
+                         secret_key="SK",
+                         bucket_name="my_bucket",
+                         extensions="any")
+    assert s.extension_allowed(".jpg")
+
+
 def test_extension_allowed_if_allowed_if_dotted():
     from pyramid_storage import s3
     s = s3.S3FileStorage(access_key="AK",

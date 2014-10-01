@@ -87,6 +87,7 @@ The extension groups are listed below:
 ============    ==========================================
 Group           Extensions
 ============    ==========================================
+any             **all** extensions (including no extensions)
 text            txt
 documents       pdf rtf odf ods gnumeric abw doc docx xls xls
 images          jpg jpe jpeg png gif svg bmp tiff
