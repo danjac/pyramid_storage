@@ -78,6 +78,11 @@ class LocalFileStorage(object):
         """
         return os.path.join(self.base_path, filename)
 
+    def open(self, filename):
+        """Return filelike object stored
+        """
+        return open(self.path(filename))
+
     def delete(self, filename):
         """Deletes the filename. Filename is resolved with the
         absolute path based on base_path. If file does not exist,
