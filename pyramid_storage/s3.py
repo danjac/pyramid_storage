@@ -203,3 +203,21 @@ class S3FileStorage(object):
                                    rewind=True)
 
         return filename
+
+    def path(self, filename):
+        """Returns absolute file path of the filename, joined to the
+        base_path.
+
+        :param filename: base name of file
+        """
+        return os.path.join(self.base_path, filename)
+
+    def resolve_name(self, name, folder):
+        """Resolves a unique name and the correct path. If a filename
+        for that path already exists then a numeric prefix will be
+        added, for example test.jpg -> test-1.jpg etc.
+
+        :param name: base name of file
+        :param folder: absolute folder path
+        """
+        raise NotImplementedError()
