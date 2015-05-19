@@ -210,7 +210,7 @@ class S3FileStorage(object):
 
         :param filename: base name of file
         """
-        return os.path.join(self.base_path, filename)
+        raise NotImplementedError()
 
     def resolve_name(self, name, folder):
         """Resolves a unique name and the correct path. If a filename
