@@ -66,7 +66,7 @@ Setting                Default                Description
 ===================    =================      ==================================================================
 **aws.access_key**     **required**           AWS access key
 **aws.secret_key**     **required**           AWS secret key
-**aws.bucket_name**    **required**           AWS bucket
+**aws.bucket**         **required**           AWS bucket
 **aws.acl**            ``public-read``        AWS ACL permissions
 **base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
 **extensions**         ``default``            List of extensions or extension groups (see below)
