@@ -71,6 +71,14 @@ Setting                Default                Description
 **base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
 **extensions**         ``default``            List of extensions or extension groups (see below)
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**
+
+**use_path_style**     ``False``              Use paths for buckets instead of subdomains (useful for testing)
+**is_secure**          ``True``               Use ``https``
+**host**               ``None``               Host for Amazon S3 server (eg. `localhost`)
+**port**               ``None``               Port for Amazon S3 server (eg. `5000`)
+**region**             ``None``               Region identifier, *host* and *port* will be ignored
+**num_retries**        ``1``                  Number of retry for connection errors
+**timeout**            ``5``                  HTTP socket timeout in seconds
 ===================    =================      ==================================================================
 
 
