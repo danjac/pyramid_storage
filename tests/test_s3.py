@@ -4,6 +4,7 @@ import mock
 import pytest
 
 from pyramid import compat
+from pyramid import exceptions as pyramid_exceptions
 
 
 class MockS3Connection(object):
@@ -226,3 +227,29 @@ def test_delete():
             _get_mock_s3_connection):
 
         s.delete("test.jpg")
+
+
+def test_from_settings_with_defaults():
+
+    from pyramid_storage import s3
+
+    settings = {
+        'storage.aws.access_key': 'abc',
+        'storage.aws.secret_key': '123',
+        'storage.aws.bucket_name': 'Attachments',
+    }
+    inst = s3.S3FileStorage.from_settings(settings, 'storage.')
+    assert inst.base_url == ''
+    assert inst.access_key == 'abc'
+    assert inst.secret_key == '123'
+    assert inst.bucket_name == 'Attachments'
+    assert inst.acl == 'public-read'
+    assert set(('jpg', 'txt', 'doc')).intersection(inst.extensions)
+
+
+def test_from_settings_if_base_path_missing():
+
+    from pyramid_storage import s3
+
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
+        s3.S3FileStorage.from_settings({}, 'storage.')

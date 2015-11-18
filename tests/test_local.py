@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from pyramid import compat
+from pyramid import exceptions as pyramid_exceptions
 
 
 def _mock_open_name():
@@ -282,5 +283,5 @@ def test_from_settings_if_base_path_missing():
 
     from pyramid_storage import local
 
-    with pytest.raises(ValueError):
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
         local.LocalFileStorage.from_settings({}, 'storage.')

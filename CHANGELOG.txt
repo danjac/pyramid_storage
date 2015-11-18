@@ -1,3 +1,9 @@
+0.1.0 (unreleased)
+==================
+
+- Bucket name is now read from ``storage.aws.bucket_name`` setting, as stated
+  in documentation.
+
 0.0.8 (2014-10-1)
 ==================
 
