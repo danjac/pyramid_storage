@@ -4,7 +4,7 @@ Official docs:
 
 https://pythonhosted.org/pyramid_storage/
 
-Tested with python 2.6, 2.7 and 3.2.
+Tested with python 2.6, 2.7, 3.4 and 3.5.
 
 This package was inspired by the flask-uploads package:
 
