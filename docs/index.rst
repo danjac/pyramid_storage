@@ -67,7 +67,7 @@ Setting                Default                Description
 **aws.access_key**     **required**           AWS access key
 **aws.secret_key**     **required**           AWS secret key
 **aws.bucket_name**    **required**           AWS bucket
-**aws.acl**            ``public-read``        AWS ACL permissions
+**aws.acl**            ``public-read``        `AWS ACL permissions <https://github.com/boto/boto/blob/v2.13.2/boto/s3/acl.py#L25-L28>`_
 **base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
 **extensions**         ``default``            List of extensions or extension groups (see below)
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**

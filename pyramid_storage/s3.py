@@ -31,13 +31,12 @@ class S3FileStorage(object):
             ('aws.access_key', True, None),
             ('aws.secret_key', True, ''),
             ('aws.bucket_name', True, None),
-            ('aws.default_acl', False, 'public-read'),
+            ('aws.acl', False, 'public-read'),
             ('base_url', False, ''),
             ('extensions', False, 'default'),
         )
         kwargs = utils.read_settings(settings, options, prefix)
         kwargs = dict([(k.replace('aws.', ''), v) for k, v in kwargs.items()])
-        kwargs['acl'] = kwargs.pop('default_acl')
         return cls(**kwargs)
 
     def __init__(self, access_key, secret_key, bucket_name,
