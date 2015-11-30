@@ -21,7 +21,7 @@ There are a number of ways to configure **pyramid_storage** with your Pyramid ap
 
 The easiest way is to add **pyramid_storage** to the **pyramid.includes** directive in your configuration file(s)::
 
-    pyramid.includes = 
+    pyramid.includes =
         pyramid_storage
 
 
@@ -35,7 +35,7 @@ will also be available as a property of your request as **request.storage**.
 
 To use S3 file storage instead of storing files locally on your server (the default assumption)::
 
-    pyramid.includes = 
+    pyramid.includes =
         pyramid_storage.s3
 
 alternatively::
@@ -67,7 +67,7 @@ Setting                Default                Description
 **aws.access_key**     **required**           AWS access key
 **aws.secret_key**     **required**           AWS secret key
 **aws.bucket_name**    **required**           AWS bucket
-**aws.acl**            ``public-read``        AWS ACL permissions
+**aws.acl**            ``public-read``        `AWS ACL permissions <https://github.com/boto/boto/blob/v2.13.2/boto/s3/acl.py#L25-L28>`_
 **base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
 **extensions**         ``default``            List of extensions or extension groups (see below)
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**
@@ -120,7 +120,7 @@ When uploading a file in a view, call :meth:`pyramid_storage.storage.FileStorage
         return HTTPSeeOther(request.route_url('home'))
 
 
-This operation will save the file to your file system under the top directory specified by the **base_path** setting. 
+This operation will save the file to your file system under the top directory specified by the **base_path** setting.
 
 If the file does not have the correct file extension, a :class:`pyramid_storage.exceptions.FileNotAllowed` exception is raised. A more secure way of writing the above would be::
 
@@ -144,7 +144,7 @@ You can override the default extensions in the method call::
                  request_method='POST')
     def upload(request):
         try:
-            request.storage.save(request.POST['my_file'],  
+            request.storage.save(request.POST['my_file'],
                                  extensions=('jpg', 'png', 'txt'))
         except FileNotAllowed:
             request.session.flash('Sorry, this file is not allowed')
@@ -157,7 +157,7 @@ You may also wish to obfuscate or randomize the filename. The ``randomize`` argu
 
 So for example if your filename is ``test.jpg`` the new filename will be something like ``235a344c-8d70-498a-af0a-151afdfcd803.jpg``.
 
-If there is a filename clash (i.e. another file with the same name is in the target directory) a numerical suffix is added to the new filename. For example, 
+If there is a filename clash (i.e. another file with the same name is in the target directory) a numerical suffix is added to the new filename. For example,
 if you have an existing file ``test.jpg`` then the next file with that name will be renamed ``test-1.jpg`` and so on.
 
 .. warning::

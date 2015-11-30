@@ -27,12 +27,17 @@ class S3FileStorage(object):
 
     @classmethod
     def from_settings(cls, settings, prefix):
-        return cls(access_key=settings[prefix + 'aws.access_key'],
-                   secret_key=settings[prefix + 'aws.secret_key'],
-                   bucket_name=settings[prefix + 'aws.bucket'],
-                   acl=settings.get(prefix + 'aws.default_acl', 'public-read'),
-                   base_url=settings.get(prefix + 'base_url', ''),
-                   extensions=settings.get(prefix + 'extensions', 'default'))
+        options = (
+            ('aws.access_key', True, None),
+            ('aws.secret_key', True, ''),
+            ('aws.bucket_name', True, None),
+            ('aws.acl', False, 'public-read'),
+            ('base_url', False, ''),
+            ('extensions', False, 'default'),
+        )
+        kwargs = utils.read_settings(settings, options, prefix)
+        kwargs = dict([(k.replace('aws.', ''), v) for k, v in kwargs.items()])
+        return cls(**kwargs)
 
     def __init__(self, access_key, secret_key, bucket_name,
                  acl=None, base_url='', extensions='default'):
