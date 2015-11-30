@@ -4,6 +4,7 @@
 - Bucket name is now read from ``storage.aws.bucket_name`` setting, as stated
   in documentation.
 - ACL is now read from ``storage.aws.acl`` setting, as stated in documentation.
+- Added new connection options for S3 (fixes #8)
 
 0.0.8 (2014-10-1)
 ==================
