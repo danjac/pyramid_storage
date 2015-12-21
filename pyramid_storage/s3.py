@@ -46,8 +46,6 @@ class S3FileStorage(object):
         )
         kwargs = utils.read_settings(settings, options, prefix)
         kwargs = dict([(k.replace('aws.', ''), v) for k, v in kwargs.items()])
-        kwargs['aws_access_key_id'] = kwargs.pop('access_key')
-        kwargs['aws_secret_access_key'] = kwargs.pop('secret_key')
         return cls(**kwargs)
 
     def __init__(self, bucket_name, acl=None, base_url='',
@@ -60,37 +58,36 @@ class S3FileStorage(object):
 
     def get_connection(self):
         try:
-            import boto
+            import boto3
         except ImportError:
-            raise RuntimeError("You must have boto installed to use s3")
+            error_msg = "You must have boto3 installed to use Amazon S3"
+            raise RuntimeError(error_msg)
 
-        from boto.s3.connection import OrdinaryCallingFormat
-        from boto.s3 import connect_to_region
+        from boto3.session import Session
+        from botocore.client import Config
 
         options = self.conn_options.copy()
-        options['is_secure'] = asbool(options['is_secure'])
-        options['port'] = int(options['port'])
+        options['aws_access_key_id'] = options.pop('access_key')
+        options['aws_secret_access_key'] = options.pop('secret_key')
+        options['use_ssl'] = asbool(options.pop('is_secure'))
+        options['region_name'] = options.pop('region')
 
+        if 'host' in options and 'port' in options:
+            options['endpoint_url'] = '%s:%s' % (options.pop('host'),
+                                                 options.pop('port'))
+
+        addressing_style = 'auto'
         if asbool(options.pop('use_path_style')):
-            options['calling_format'] = OrdinaryCallingFormat()
+            addressing_style = 'path'
 
-        num_retries = int(options.pop('num_retries'))
-        timeout = float(options.pop('timeout'))
+        config = Config(connect_timeout=float(options.pop('timeout')),
+                        s3=dict(addressing_style=addressing_style))
 
-        region = options.pop('region')
-        if region:
-            del options['host']
-            del options['port']
-            conn = connect_to_region(region, **options)
-        else:
-            conn = boto.connect_s3(**options)
+        # XXX num_retries = int(options.pop('num_retries'))
 
-        conn.num_retries = num_retries
-        conn.http_connection_kwargs['timeout'] = timeout
-        return conn
-
-    def get_bucket(self):
-        return self.get_connection().get_bucket(self.bucket_name)
+        session = Session()
+        client = session.client('s3', **options)
+        return client
 
     def url(self, filename):
         """Returns entire URL of the filename, joined to the base_url
@@ -100,7 +97,8 @@ class S3FileStorage(object):
         return compat.urlparse.urljoin(self.base_url, filename)
 
     def exists(self, filename):
-        return self.get_bucket().new_key(filename).exists()
+        return self.get_connection().head_object(Bucket=self.bucket_name,
+                                                 Key=filename)
 
     def delete(self, filename):
         """Deletes the filename. Filename is resolved with the
@@ -109,7 +107,8 @@ class S3FileStorage(object):
 
         :param filename: base name of file
         """
-        self.get_bucket().delete_key(filename)
+        self.get_connection().delete_object(Bucket=self.bucket_name,
+                                            Key=filename)
 
     def filename_allowed(self, filename, extensions=None):
         """Checks if a filename has an allowed extension
@@ -179,19 +178,16 @@ class S3FileStorage(object):
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
     def save_file(self, file, filename, folder=None, randomize=False,
-                  extensions=None, acl=None, replace=False, headers=None):
+                  extensions=None, acl=None):
         """
         :param filename: local filename
         :param folder: relative path of sub-folder
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
-        :param acl: ACL policy (if None then uses default)
-        :param replace: replace existing key
-        :param headers: dict of s3 request headers
+        :param acl: ACL policy (if None then uses setting)
         :returns: modified filename
         """
         acl = acl or self.acl
-        headers = headers or {}
         extensions = extensions or self.extensions
 
         if not self.filename_allowed(filename, extensions):
@@ -210,21 +206,14 @@ class S3FileStorage(object):
         content_type, _ = mimetypes.guess_type(filename)
         content_type = content_type or 'application/octet-stream'
 
-        headers.update({
-            'Content-Type': content_type,
-        })
-
-        bucket = self.get_bucket()
-
-        key = bucket.get_key(filename) or bucket.new_key(filename)
-        key.set_metadata('Content-Type', content_type)
+        metadata = {'Content-Type': content_type}
 
         file.seek(0)
 
-        key.set_contents_from_file(file,
-                                   headers=headers,
-                                   policy=acl,
-                                   replace=replace,
-                                   rewind=True)
-
+        self.get_connection().put_object(Bucket=self.bucket_name,
+                                         Key=filename,
+                                         Body=file,
+                                         Metadata=metadata,
+                                         ContentType=content_type,
+                                         ACL=acl)
         return filename

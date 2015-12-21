@@ -198,7 +198,7 @@ Usage: s3 file storage
 -------------------------
 
 .. warning::
-    S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto``). As of writing this library is not Python 3 compatible.
+    S3 support requires you install the `Boto3`_ library separately (e.g. ``pip install boto3``).
 
 .. warning::
     It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
@@ -215,17 +215,7 @@ Basic usage is similar to **LocalFileStorage**::
         return HTTPSeeOther(request.route_url('home'))
 
 
-One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips. Instead you can pass the ``replace`` argument to replace the file on s3 (default is **False**)::
-
-
-    from pyramid.view import view_config
-    from pyramid.httpexceptions import HTTPSeeOther
-
-    @view_config(route_name='upload',
-                 request_method='POST')
-    def upload(request):
-        request.storage.save(request.POST['my_file'], replace=True)
-        return HTTPSeeOther(request.route_url('home'))
+One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips.
 
 Alternatively you can use the ``randomize`` argument to ensure a (near) unique filename.
 
