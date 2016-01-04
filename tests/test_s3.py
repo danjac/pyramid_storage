@@ -246,6 +246,13 @@ def test_from_settings_with_defaults():
     assert inst.conn_options['aws_secret_access_key'] == '123'
     assert set(('jpg', 'txt', 'doc')).intersection(inst.extensions)
 
+    with mock.patch('boto.connect_s3') as boto_mocked:
+        boto_mocked.return_value.http_connection_kwargs = {}
+        inst.get_connection()
+        _, boto_options = boto_mocked.call_args_list[0]
+        assert 'host' not in boto_options
+        assert 'port' not in boto_options
+
 
 def test_from_settings_if_base_path_missing():
 
