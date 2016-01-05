@@ -69,7 +69,14 @@ class S3FileStorage(object):
 
         options = self.conn_options.copy()
         options['is_secure'] = asbool(options['is_secure'])
-        options['port'] = int(options['port'])
+
+        if options['port']:
+            options['port'] = int(options['port'])
+        else:
+            del options['port']
+
+        if not options['host']:
+            del options['host']
 
         if asbool(options.pop('use_path_style')):
             options['calling_format'] = OrdinaryCallingFormat()
