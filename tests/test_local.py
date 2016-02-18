@@ -118,7 +118,7 @@ def test_save_file():
     for patch in patches:
         patch.start()
 
-    name = s.save_file(mock.Mock(), "test.jpg")
+    name = s.save_file(mock.Mock(), "test.jpg", replace=True)
     assert name == "test.jpg"
 
     for patch in patches:
