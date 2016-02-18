@@ -42,7 +42,7 @@ tests_require = [
 setup(
     name='pyramid_storage',
     cmdclass={'test': PyTest},
-    version='0.2.0.dev0',
+    version='0.1.2',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
