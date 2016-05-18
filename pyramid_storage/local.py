@@ -112,6 +112,9 @@ class LocalFileStorage(object):
         :param extensions: iterable of extensions (or self.extensions)
         """
 
+        if isinstance(extensions, tuple) and not extensions:
+            return True
+            
         extensions = extensions or self.extensions
         if not extensions:
             return True
@@ -166,7 +169,8 @@ class LocalFileStorage(object):
         :returns: modified filename
         """
 
-        extensions = extensions or self.extensions
+        extensions = extensions if isinstance(extensions, tuple) else extensions or self.extensions
+
 
         if not self.filename_allowed(filename, extensions):
             raise FileNotAllowed()
