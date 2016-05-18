@@ -111,7 +111,10 @@ class LocalFileStorage(object):
 
         :param extensions: iterable of extensions (or self.extensions)
         """
-
+        
+        # empty tuple is equal to False and (ANY) defined as empty tuple
+        if isinstance(extensions, tuple):
+            return True
         extensions = extensions or self.extensions
         if not extensions:
             return True
