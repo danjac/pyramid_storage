@@ -1,6 +1,6 @@
 ANY = ()
 TEXT = ('txt',)
-DOCUMENTS = tuple('pdf rtf odf ods gnumeric abw doc docx xls xls'.split())
+DOCUMENTS = tuple('pdf rtf odf ods gnumeric abw doc docx xls xlsx'.split())
 IMAGES = tuple('jpg jpe jpeg png gif svg bmp tiff'.split())
 AUDIO = tuple('wav mp3 aac ogg oga flac'.split())
 VIDEO = tuple('mpeg 3gp avi divx dvr flv mp4 wmv'.split())
