@@ -45,17 +45,7 @@ class LocalFileStorage(object):
             ('base_url', False, ''),
             ('extensions', False, 'default'),
         )
-
-        kwargs = {}
-
-        for name, required, default in options:
-            try:
-                kwargs[name] = settings[prefix + name]
-            except KeyError:
-                if required:
-                    raise ValueError("%s%s is required" % (prefix, name))
-                kwargs[name] = default
-
+        kwargs = utils.read_settings(settings, options, prefix)
         return cls(**kwargs)
 
     def __init__(self, base_path, base_url='', extensions='default'):
@@ -168,7 +158,7 @@ class LocalFileStorage(object):
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
     def save_file(self, file, filename, folder=None, randomize=False,
-                  extensions=None, replace=None):
+                  extensions=None, **kwargs):
         """Saves a file object to the uploads location.
         Returns the resolved filename, i.e. the folder +
         the (randomized/incremented) base name.
