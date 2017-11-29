@@ -107,7 +107,7 @@ class S3FileStorage(object):
         """
         return compat.urlparse.urljoin(self.base_url, filename)
 
-    def open(self, filename):
+    def open(self, filename, *args):
         """Return filelike object stored
         """
 
@@ -118,7 +118,7 @@ class S3FileStorage(object):
         f.close()
         key.get_contents_to_filename(f.name)
 
-        return open(f.name)
+        return open(f.name, *args)
 
     def exists(self, filename):
         return self.get_bucket().new_key(filename).exists()
