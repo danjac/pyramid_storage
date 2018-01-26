@@ -231,7 +231,7 @@ def test_save_in_folder_with_subdir():
             _get_mock_s3_connection):
         name = s.save(fs, folder="my_folder", partition_sub_dir=True)
 
-    regex = re.compile('my_folder/[a-z-0-9]+/test.jpg')
+    regex = re.compile('my_folder/[a-f-0-9]+/test.jpg')
 
     assert regex.match(name) is not None
 
