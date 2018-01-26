@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from pyramid import compat
+from pyramid import exceptions as pyramid_exceptions
 
 
 def _mock_open_name():
@@ -119,7 +120,7 @@ def test_save_file():
     for patch in patches:
         patch.start()
 
-    name = s.save_file(mock.Mock(), "test.jpg")
+    name = s.save_file(mock.Mock(), "test.jpg", replace=True)
     assert name == "test.jpg"
 
     for patch in patches:
@@ -313,5 +314,5 @@ def test_from_settings_if_base_path_missing():
 
     from pyramid_storage import local
 
-    with pytest.raises(ValueError):
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
         local.LocalFileStorage.from_settings({}, 'storage.')

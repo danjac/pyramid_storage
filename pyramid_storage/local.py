@@ -46,17 +46,7 @@ class LocalFileStorage(object):
             ('base_url', False, ''),
             ('extensions', False, 'default'),
         )
-
-        kwargs = {}
-
-        for name, required, default in options:
-            try:
-                kwargs[name] = settings[prefix + name]
-            except KeyError:
-                if required:
-                    raise ValueError("%s%s is required" % (prefix, name))
-                kwargs[name] = default
-
+        kwargs = utils.read_settings(settings, options, prefix)
         return cls(**kwargs)
 
     def __init__(self, base_path, base_url='', extensions='default'):
@@ -79,10 +69,10 @@ class LocalFileStorage(object):
         """
         return os.path.join(self.base_path, filename)
 
-    def open(self, filename):
+    def open(self, filename, *args):
         """Return filelike object stored
         """
-        return open(self.path(filename))
+        return open(self.path(filename), *args)
 
     def delete(self, filename):
         """Deletes the filename. Filename is resolved with the
@@ -169,7 +159,7 @@ class LocalFileStorage(object):
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
     def save_file(self, file, filename, folder=None, randomize=False,
-                  extensions=None, replace=None, partition_sub_dir=False):
+                  extensions=None, partition_sub_dir=False, **kwargs):
         """Saves a file object to the uploads location.
         Returns the resolved filename, i.e. the folder +
         the (randomized/incremented) base name.

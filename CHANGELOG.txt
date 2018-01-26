@@ -1,3 +1,30 @@
+0.2.0 (unreleased)
+==================
+
+- Nothing changed yet.
+
+
+0.1.2 (2016-02-18)
+==================
+
+**Bug fixes**
+
+- Ignore extra keyword args for the local storage backend (for example S3
+  headers or ACL)
+
+0.1.1 (2016-02-04)
+==================
+
+- Do not require port setting for S3 (fixes #15)
+
+0.1.0 (2015-11-30)
+==================
+
+- Bucket name is now read from ``storage.aws.bucket_name`` setting, as stated
+  in documentation.
+- ACL is now read from ``storage.aws.acl`` setting, as stated in documentation.
+- Added new connection options for S3 (fixes #8)
+
 0.0.8 (2014-10-1)
 ==================
 
