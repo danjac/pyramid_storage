@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 import mock
 import pytest
 
@@ -210,6 +212,29 @@ def test_save_in_folder():
             _get_mock_s3_connection):
         name = s.save(fs, folder="my_folder")
     assert name == "my_folder/test.jpg"
+
+
+def test_save_in_folder_with_subdir():
+
+    from pyramid_storage import s3
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+        name = s.save(fs, folder="my_folder", partition_sub_dir=True)
+
+    regex = re.compile('my_folder/[a-f-0-9]+/test.jpg')
+
+    assert regex.match(name) is not None
 
 
 def test_delete():

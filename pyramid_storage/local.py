@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import uuid
 
 from pyramid import compat
 from zope.interface import implementer
@@ -158,7 +159,7 @@ class LocalFileStorage(object):
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
     def save_file(self, file, filename, folder=None, randomize=False,
-                  extensions=None, **kwargs):
+                  extensions=None, partition_sub_dir=False, **kwargs):
         """Saves a file object to the uploads location.
         Returns the resolved filename, i.e. the folder +
         the (randomized/incremented) base name.
@@ -181,6 +182,11 @@ class LocalFileStorage(object):
         )
 
         if folder:
+            if partition_sub_dir:
+                # This is a generic way to create sub directories. Using just the 3 first characters of an uuid is just an
+                # alternative like using part of the epoch time...
+                # As this is not a final solution, we are using it as simple as possible...
+                folder = '{}/{}'.format(folder, uuid.uuid4().hex[0:3])
             dest_folder = os.path.join(self.base_path, folder)
         else:
             dest_folder = self.base_path
