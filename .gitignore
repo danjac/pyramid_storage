@@ -21,3 +21,4 @@ docs/build
 docs/_build
 *\$py.class
 .env
+.ropeproject
