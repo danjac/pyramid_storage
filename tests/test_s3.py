@@ -254,4 +254,3 @@ def test_folder_listing():
         files_list = s.get_files_list("uploads")
 
         assert 'image1.png' in files_list
-
