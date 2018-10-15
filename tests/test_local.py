@@ -284,3 +284,23 @@ def test_from_settings_if_base_path_missing():
 
     with pytest.raises(ValueError):
         local.LocalFileStorage.from_settings({}, 'storage.')
+
+
+def test_folder_listing():
+    from pyramid_storage import local
+    s = local.LocalFileStorage("uploads")
+
+    def mock_get_file_list(folder):
+        return ['image1.png', 'image2.png']
+
+    patches = (
+        mock.patch('os.listdir', mock_get_file_list),
+        mock.patch('os.path.exists', lambda p: True),
+    )
+    for patch in patches:
+        patch.start()
+
+    files_list = s.get_files_list('uploads')
+    assert 'image1.png' in files_list
+    assert 'image2.png' in files_list
+

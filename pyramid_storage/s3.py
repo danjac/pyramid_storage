@@ -221,3 +221,14 @@ class S3FileStorage(object):
         :param folder: absolute folder path
         """
         raise NotImplementedError()
+
+    def get_files_list(self, folder):
+        """
+        Get a list of files from current folder
+        :param folder:
+        :return:
+        """
+        bucket = self.get_bucket()
+        files_list = [key.name for key in bucket.list(prefix='{}/'.format(folder), delimiter='/')]
+
+        return files_list

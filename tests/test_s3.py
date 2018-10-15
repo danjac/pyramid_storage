@@ -6,10 +6,20 @@ import pytest
 from pyramid import compat
 
 
+class MockBucket(mock.Mock):
+
+    def list(self, prefix, delimiter):
+
+        mock_key_1 = mock.Mock
+        mock_key_1.name = 'image1.png'
+
+        return [mock_key_1]
+
+
 class MockS3Connection(object):
 
     def get_bucket(self, bucket_name):
-        return mock.Mock()
+        return MockBucket()
 
 
 def _get_mock_s3_connection(self):
@@ -226,3 +236,22 @@ def test_delete():
             _get_mock_s3_connection):
 
         s.delete("test.jpg")
+
+
+def test_folder_listing():
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+
+        files_list = s.get_files_list("uploads")
+
+        assert 'image1.png' in files_list
+

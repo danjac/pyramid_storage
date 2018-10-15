@@ -230,3 +230,20 @@ class LocalFileStorage(object):
                 return name, path
             counter += 1
             name = '%s-%d%s' % (basename, counter, ext)
+
+    def get_files_list(self, folder):
+        """
+        Get a list of files from current folder
+        :param folder:
+        :return:
+        """
+
+        if folder:
+            dest_folder = os.path.join(self.base_path, folder)
+        else:
+            dest_folder = self.base_path
+
+        if not os.path.exists(dest_folder):
+            return
+
+        return os.listdir(dest_folder)
