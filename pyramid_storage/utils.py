@@ -6,6 +6,7 @@ import uuid
 import unicodedata
 
 from pyramid import compat
+from pyramid import exceptions as pyramid_exceptions
 
 
 _filename_ascii_strip_re = re.compile(r'[^A-Za-z0-9_.-]')
@@ -49,3 +50,27 @@ def random_filename(filename):
     """
     _, ext = os.path.splitext(filename)
     return str(uuid.uuid4()) + ext.lower()
+
+
+def read_settings(settings, options, prefix=''):
+    """Reads the `settings` dictionnary, and sets defaults using the
+    provided list of tuples in `options`.
+
+    :param settings: settings to read.
+    :param options: a list of tuples (name, required, default).
+    :param prefix: prefix for the settings keys.
+    :returns: a dictionnary with defaults set.
+    :raises: :exc:`~pyramid:pyramid.exceptions.ConfigurationError` if a
+        required setting is not provided.
+    """
+    result = {}
+    for name, required, default in options:
+        setting = prefix + name
+        try:
+            result[name] = settings[setting]
+        except KeyError:
+            if required:
+                error_msg = "%s is required" % setting
+                raise pyramid_exceptions.ConfigurationError(error_msg)
+            result[name] = default
+    return result
