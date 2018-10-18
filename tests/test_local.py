@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
+
 import mock
 import pytest
 
 from pyramid import compat
+from pyramid import exceptions as pyramid_exceptions
 
 
 def _mock_open_name():
@@ -117,7 +120,7 @@ def test_save_file():
     for patch in patches:
         patch.start()
 
-    name = s.save_file(mock.Mock(), "test.jpg")
+    name = s.save_file(mock.Mock(), "test.jpg", replace=True)
     assert name == "test.jpg"
 
     for patch in patches:
@@ -192,6 +195,35 @@ def test_save_in_folder():
 
     name = s.save(fs, folder="photos")
     assert name == "photos%stest.jpg" % os.path.sep
+
+    for patch in patches:
+        patch.stop()
+
+
+def test_save_in_folder_with_subdir():
+    from pyramid_storage import local
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    s = local.LocalFileStorage("uploads", extensions="images")
+
+    patches = (
+        mock.patch(_mock_open_name()), _mock_open(),
+        mock.patch("os.path.exists", lambda p: False),
+        mock.patch("os.makedirs", lambda p: True),
+        mock.patch("shutil.copyfileobj", lambda x, y: True),
+    )
+
+    for patch in patches:
+        patch.start()
+
+    name = s.save(fs, folder="photos", partition_sub_dir=True)
+
+    regex = re.compile(
+    "photos{}[a-f-0-9]+{}test.jpg".format(os.path.sep, os.path.sep)
+    )
+    assert regex.match(name) is not None
 
     for patch in patches:
         patch.stop()
@@ -282,7 +314,7 @@ def test_from_settings_if_base_path_missing():
 
     from pyramid_storage import local
 
-    with pytest.raises(ValueError):
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
         local.LocalFileStorage.from_settings({}, 'storage.')
 
 

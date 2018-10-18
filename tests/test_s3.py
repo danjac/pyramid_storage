@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 import mock
 import pytest
 
 from pyramid import compat
+from pyramid import exceptions as pyramid_exceptions
 
 
 class MockBucket(mock.Mock):
@@ -221,6 +224,29 @@ def test_save_in_folder():
     assert name == "my_folder/test.jpg"
 
 
+def test_save_in_folder_with_subdir():
+
+    from pyramid_storage import s3
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection',
+            _get_mock_s3_connection):
+        name = s.save(fs, folder="my_folder", partition_sub_dir=True)
+
+    regex = re.compile('my_folder/[a-f-0-9]+/test.jpg')
+
+    assert regex.match(name) is not None
+
+
 def test_delete():
 
     from pyramid_storage import s3
@@ -254,3 +280,93 @@ def test_folder_listing():
         files_list = s.get_files_list("uploads")
 
         assert 'image1.png' in files_list
+
+def test_from_settings_with_defaults():
+
+    from pyramid_storage import s3
+
+    settings = {
+        'storage.aws.access_key': 'abc',
+        'storage.aws.secret_key': '123',
+        'storage.aws.bucket_name': 'Attachments',
+    }
+    inst = s3.S3FileStorage.from_settings(settings, 'storage.')
+    assert inst.base_url == ''
+    assert inst.bucket_name == 'Attachments'
+    assert inst.acl == 'public-read'
+    assert inst.conn_options['aws_access_key_id'] == 'abc'
+    assert inst.conn_options['aws_secret_access_key'] == '123'
+    assert set(('jpg', 'txt', 'doc')).intersection(inst.extensions)
+
+    with mock.patch('boto.connect_s3') as boto_mocked:
+        boto_mocked.return_value.http_connection_kwargs = {}
+        inst.get_connection()
+        _, boto_options = boto_mocked.call_args_list[0]
+        assert 'host' not in boto_options
+        assert 'port' not in boto_options
+
+
+def test_from_settings_if_base_path_missing():
+
+    from pyramid_storage import s3
+
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
+        s3.S3FileStorage.from_settings({}, 'storage.')
+
+
+def test_from_settings_with_additional_options():
+
+    from pyramid_storage import s3
+
+    settings = {
+        'storage.aws.access_key': 'abc',
+        'storage.aws.secret_key': '123',
+        'storage.aws.bucket_name': 'Attachments',
+        'storage.aws.is_secure': 'false',
+        'storage.aws.host': 'localhost',
+        'storage.aws.port': '5000',
+        'storage.aws.use_path_style': 'true',
+        'storage.aws.num_retries': '3',
+        'storage.aws.timeout': '10',
+    }
+    inst = s3.S3FileStorage.from_settings(settings, 'storage.')
+    with mock.patch('boto.connect_s3') as boto_mocked:
+        boto_mocked.return_value.http_connection_kwargs = {}
+        conn = inst.get_connection()
+        assert conn.num_retries == 3
+        assert conn.http_connection_kwargs['timeout'] == 10
+
+        _, boto_options = boto_mocked.call_args_list[0]
+
+        calling_format = boto_options.pop('calling_format')
+        assert calling_format.__class__.__name__ == 'OrdinaryCallingFormat'
+
+        assert boto_options == {
+            'is_secure': False,
+            'host': 'localhost',
+            'port': 5000,
+            'aws_access_key_id': 'abc',
+            'aws_secret_access_key': '123'
+        }
+
+
+def test_from_settings_with_regional_options_ignores_host_port():
+
+    from pyramid_storage import s3
+
+    settings = {
+        'storage.aws.access_key': 'abc',
+        'storage.aws.secret_key': '123',
+        'storage.aws.bucket_name': 'Attachments',
+        'storage.aws.region': 'eu-west-1',
+        'storage.aws.host': 'localhost',
+        'storage.aws.port': '5000',
+    }
+    inst = s3.S3FileStorage.from_settings(settings, 'storage.')
+    with mock.patch('boto.s3.connect_to_region') as boto_mocked:
+        boto_mocked.return_value.http_connection_kwargs = {}
+        inst.get_connection()
+        _, boto_options = boto_mocked.call_args_list[0]
+        assert 'host' not in boto_options
+        assert 'port' not in boto_options
+
