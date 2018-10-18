@@ -25,6 +25,7 @@ jobs:
       - run:
           name: run tests
           command: |
+            source /home/circleci/repo/venv/bin/activate
             pytest
 
   test-python-3-6:
@@ -52,6 +53,7 @@ jobs:
       - run:
           name: run tests
           command: |
+            source /home/circleci/repo/venv/bin/activate
             pytest
       - persist_to_workspace:
           root: .
