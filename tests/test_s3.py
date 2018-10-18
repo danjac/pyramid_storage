@@ -280,7 +280,6 @@ def test_folder_listing():
 
         assert 'image1.png' in files_list
 
-<<<<<<< HEAD
 def test_folder_listing():
     from pyramid_storage import s3
 
