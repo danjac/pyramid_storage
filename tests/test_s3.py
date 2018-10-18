@@ -25,6 +25,16 @@ class MockS3Connection(object):
         return MockBucket()
 
 
+class MockS3Resource(object):
+
+    def Bucket(self, bucket_name):
+        return MockBucket()
+
+
+def _get_mock_s3_resource(self):
+    return MockS3Resource()
+
+
 def _get_mock_s3_connection(self):
     return MockS3Connection()
 
@@ -370,3 +380,31 @@ def test_from_settings_with_regional_options_ignores_host_port():
         _, boto_options = boto_mocked.call_args_list[0]
         assert 'host' not in boto_options
         assert 'port' not in boto_options
+
+
+def test_from_settings_with_boto3_options():
+
+    from pyramid_storage import s3
+
+    settings = {
+        'storage.aws.access_key': 'abc',
+        'storage.aws.secret_key': '123',
+        'storage.aws.bucket_name': 'Attachments',
+        'storage.aws.is_secure': 'false',
+        'storage.aws.host': 'localhost',
+        'storage.aws.port': '5000',
+        'storage.aws.use_path_style': 'true',
+        'storage.aws.num_retries': '3',
+        'storage.aws.timeout': '10',
+        'storage.aws.boto3': True,
+    }
+    s3 = s3.S3FileStorage.from_settings(settings, 'storage.')
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_resource',
+            _get_mock_s3_resource):
+
+        files_list = s3.get_files_list("uploads")
+
+        assert 'image1.png' in files_list
+
