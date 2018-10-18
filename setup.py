@@ -36,6 +36,7 @@ docs_extras = [
 tests_require = [
     'pytest',
     'mock',
+    'boto'
 ]
 
 
