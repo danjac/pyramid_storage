@@ -263,22 +263,6 @@ def test_delete():
 
         s.delete("test.jpg")
 
-def test_folder_listing():
-    from pyramid_storage import s3
-
-    s = s3.S3FileStorage(
-        access_key="AK",
-        secret_key="SK",
-        bucket_name="my_bucket",
-        extensions="images")
-
-    with mock.patch(
-            'pyramid_storage.s3.S3FileStorage.get_connection',
-            _get_mock_s3_connection):
-
-        files_list = s.get_files_list("uploads")
-
-        assert 'image1.png' in files_list
 
 def test_folder_listing():
     from pyramid_storage import s3
@@ -296,6 +280,7 @@ def test_folder_listing():
         files_list = s.get_files_list("uploads")
 
         assert 'image1.png' in files_list
+
 
 def test_from_settings_with_defaults():
 
