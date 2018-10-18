@@ -57,9 +57,9 @@ setup(
     install_requires=[
         'pyramid',
     ],
-    tests_require=tests_require,
     extras_require={
         'docs': docs_extras,
+        'test': tests_require
     },
     test_suite='pyramid_storage',
     classifiers=[
