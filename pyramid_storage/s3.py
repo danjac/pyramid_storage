@@ -258,8 +258,8 @@ class S3FileStorage(object):
 
         if folder:
             if partition_sub_dir:
-                # This is a generic way to create sub directories. Using just the 3 first characters of an uuid is just an
-                # alternative like using part of the epoch time...
+                # This is a generic way to create sub directories. Using just the 3 first characters of an uuid is just
+                # an alternative like using part of the epoch time...
                 # As this is not a final solution, we are using it as simple as possible...
                 folder = '{}/{}'.format(folder, uuid.uuid4().hex[0:3])
             filename = folder + "/" + filename
