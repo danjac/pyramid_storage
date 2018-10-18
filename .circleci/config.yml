@@ -16,7 +16,8 @@ jobs:
           name: install dependencies
           command: |
             virtualenv venv
-            /home/circleci/repo/venv/bin/pip install -e .[test]
+            source /home/circleci/repo/venv/bin/activate
+            pip install -e .[test]
       - save_cache:
           paths:
             - ./venv
@@ -24,7 +25,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            /home/circleci/repo/venv/bin/pytest
+            pytest
 
   test-python-3-6:
     docker:
@@ -42,7 +43,8 @@ jobs:
           name: install dependencies
           command: |
             virtualenv venv
-            /home/circleci/repo/venv/bin/pip install -e .[test]
+            source /home/circleci/repo/venv/bin/activate
+            pip install -e .[test]
       - save_cache:
           paths:
             - ./venv
@@ -50,7 +52,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            /home/circleci/repo/venv/bin/pytest
+            pytest
       - persist_to_workspace:
           root: .
           paths:
