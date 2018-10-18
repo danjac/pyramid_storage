@@ -36,13 +36,14 @@ docs_extras = [
 tests_require = [
     'pytest',
     'mock',
+    'boto'
 ]
 
 
 setup(
     name='pyramid_storage',
     cmdclass={'test': PyTest},
-    version='0.2.0.dev0',
+    version='1.0.0',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
@@ -57,9 +58,9 @@ setup(
     install_requires=[
         'pyramid',
     ],
-    tests_require=tests_require,
     extras_require={
         'docs': docs_extras,
+        'test': tests_require
     },
     test_suite='pyramid_storage',
     classifiers=[
