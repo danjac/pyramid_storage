@@ -17,7 +17,7 @@ jobs:
           command: |
             virtualenv venv
             source /home/circleci/repo/venv/bin/activate
-            pip install -e .[test]
+            pip install -e .
       - save_cache:
           paths:
             - ./venv
@@ -45,7 +45,7 @@ jobs:
           command: |
             virtualenv venv
             source /home/circleci/repo/venv/bin/activate
-            pip install -e .[test]
+            pip install -e .
       - save_cache:
           paths:
             - ./venv
