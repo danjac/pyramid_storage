@@ -117,11 +117,11 @@ class S3FileStorage(object):
         options = self.conn_options.copy()
 
         resource = boto3.resource('s3',
-                                  endpoint_url=options['aws.host'],
-                                  aws_access_key_id=options['aws.access_key'],
-                                  aws_secret_access_key=options['aws.secret_key'],
-                                  config=Config(signature_version=options['aws.signature_version']),
-                                  region_name=options['aws.region'])
+                                  endpoint_url=options['host'],
+                                  aws_access_key_id=options['aws_access_key_id'],
+                                  aws_secret_access_key=options['aws_secret_access_key'],
+                                  config=Config(signature_version=options['signature_version']),
+                                  region_name=options['region'])
 
         return resource
 
