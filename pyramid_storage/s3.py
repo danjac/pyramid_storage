@@ -117,7 +117,7 @@ class S3FileStorage(object):
         options = self.conn_options.copy()
 
         resource = boto3.resource('s3',
-                                  endpoint_url=options['host'],
+                                  endpoint_url='{}:{}'.format(options['host'], options['port']),
                                   aws_access_key_id=options['aws_access_key_id'],
                                   aws_secret_access_key=options['aws_secret_access_key'],
                                   config=Config(signature_version=options['signature_version']),
