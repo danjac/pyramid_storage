@@ -63,6 +63,9 @@ class S3V2FileStorage(S3FileStorage):
         self.extensions = resolve_extensions(extensions)
         self.conn_options = conn_options
 
+    def get_connection(self):
+        raise NotImplementedError()
+
     def get_resource(self):
 
         try:
@@ -98,7 +101,7 @@ class S3V2FileStorage(S3FileStorage):
 
         bucket = self.get_bucket()
         object = bucket.Object(filename)
-        stream = object.get()['body']
+        stream = object.get()['Body']
 
         f = tempfile.NamedTemporaryFile(delete=False)
         f.write(stream.read())
