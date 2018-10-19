@@ -164,16 +164,18 @@ class S3V2FileStorage(S3FileStorage):
 
         bucket = self.get_bucket()
 
-        key = bucket.get_key(filename) or bucket.new_key(filename)
-        key.set_metadata('Content-Type', content_type)
 
-        file.seek(0)
 
-        key.set_contents_from_file(file,
-                                   headers=headers,
-                                   policy=acl,
-                                   replace=replace,
-                                   rewind=True)
+        # key = bucket.get_key(filename) or bucket.new_key(filename)
+        # key.set_metadata('Content-Type', content_type)
+        #
+        # file.seek(0)
+        #
+        # key.set_contents_from_file(file,
+        #                            headers=headers,
+        #                            policy=acl,
+        #                            replace=replace,
+        #                            rewind=True)
 
         return filename
 
@@ -205,3 +207,29 @@ class S3V2FileStorage(S3FileStorage):
         files_list = [file.key for file in bucket.objects.all() if folder in file.key]
 
         return files_list
+
+    def copy_file(self, src, dst):
+        """
+        Copy a file to a new location in the same bucket
+        :param src: key for source file
+        :param dst: key for destination file
+        :return:
+        """
+
+        bucket = self.get_bucket()
+        src_copy = {
+            'Bucket': bucket.name,
+            'Key': src
+        }
+        bucket.copy(src_copy, dst)
+
+    def move_file(self, src, dst):
+        """
+        Move a file from a location to another (A copy folloeed by a delete of the source file
+        :param src: key for source file
+        :param dst: key for destination file
+        :return:
+        """
+        self.copy_file(src, dst)
+        self.delete(src)
+
