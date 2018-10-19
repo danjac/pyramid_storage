@@ -98,29 +98,7 @@ class S3FileStorage(object):
         conn.http_connection_kwargs['timeout'] = timeout
         return conn
 
-    def get_resource(self):
-
-        try:
-            import boto3
-        except ImportError:
-            raise RuntimeError("You must have boto3 installed to use s3 with boto3 support")
-        from botocore.client import Config
-
-        options = self.conn_options.copy()
-
-        resource = boto3.resource('s3',
-                                  endpoint_url='{}:{}'.format(options['host'], options['port']),
-                                  aws_access_key_id=options['aws_access_key_id'],
-                                  aws_secret_access_key=options['aws_secret_access_key'],
-                                  config=Config(signature_version=options['signature_version']),
-                                  region_name=options['region'])
-
-        return resource
-
     def get_bucket(self):
-        if self.conn_options.get('boto3'):
-            return self.get_resource().Bucket(self.bucket_name)
-
         return self.get_connection().get_bucket(self.bucket_name)
 
     def url(self, filename):

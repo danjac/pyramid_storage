@@ -88,20 +88,12 @@ class S3V2FileStorage(S3FileStorage):
     def get_bucket(self):
         return self.get_resource().Bucket(self.bucket_name)
 
-    def url(self, filename):
-        """Returns entire URL of the filename, joined to the base_url
-
-        :param filename: base name of file
-        """
-        return compat.urlparse.urljoin(self.base_url, filename)
-
     def open(self, filename, *args):
         """Return filelike object stored
         """
 
         bucket = self.get_bucket()
-        object = bucket.Object(filename)
-        stream = object.get()['Body']
+        stream = bucket.Object(filename).get()['Body']
 
         f = tempfile.NamedTemporaryFile(delete=False)
         f.write(stream.read())
@@ -110,7 +102,17 @@ class S3V2FileStorage(S3FileStorage):
         return open(f.name, *args)
 
     def exists(self, filename):
-        return self.get_bucket().new_key(filename).exists()
+        """
+        Test if a file exists
+        :param filename:
+        :return:
+        """
+        file_object = self.get_bucket().Object(filename)
+        try :
+            file_object.get()
+            return True
+        except file_object.meta.client.exceptions.NoSuchKey:
+            return False
 
     def delete(self, filename):
         """Deletes the filename. Filename is resolved with the
@@ -119,7 +121,8 @@ class S3V2FileStorage(S3FileStorage):
 
         :param filename: base name of file
         """
-        self.get_bucket().delete_key(filename)
+        file_object = self.get_bucket().Object(filename)
+        file_object.delete()
 
     def save_file(self, file, filename, folder=None, randomize=False,
                   extensions=None, acl=None, replace=False, headers=None, partition_sub_dir=False):
@@ -164,18 +167,12 @@ class S3V2FileStorage(S3FileStorage):
 
         bucket = self.get_bucket()
 
+        file_object = bucket.Object(filename)
 
-
-        # key = bucket.get_key(filename) or bucket.new_key(filename)
-        # key.set_metadata('Content-Type', content_type)
-        #
-        # file.seek(0)
-        #
-        # key.set_contents_from_file(file,
-        #                            headers=headers,
-        #                            policy=acl,
-        #                            replace=replace,
-        #                            rewind=True)
+        if acl:
+            file_object.upload_fileobj(file, extra_args={'ACL': acl})
+        else:
+            file_object.upload_fileobj(file)
 
         return filename
 
