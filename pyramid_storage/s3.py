@@ -45,8 +45,6 @@ class S3FileStorage(object):
             ('aws.region', False, None),
             ('aws.num_retries', False, 1),
             ('aws.timeout', False, 5),
-            ('aws.boto3', False, None),
-            ('aws.signature_version', False, None),
         )
         kwargs = utils.read_settings(settings, options, prefix)
         kwargs = dict([(k.replace('aws.', ''), v) for k, v in kwargs.items()])
@@ -81,12 +79,6 @@ class S3FileStorage(object):
 
         if not options['host']:
             del options['host']
-
-        if not options['boto3']:
-            del options['boto3']
-
-        if not options['signature_version']:
-            del options['signature_version']
 
         if asbool(options.pop('use_path_style')):
             options['calling_format'] = OrdinaryCallingFormat()
@@ -311,6 +303,6 @@ class S3FileStorage(object):
         :return:
         """
         bucket = self.get_bucket()
-        files_list = [key.name for key in bucket.list(prefix='{}\\'.format(folder), delimiter='\\')]
+        files_list = [key.name for key in bucket.list(prefix='{}/'.format(folder), delimiter='/')]
 
         return files_list
