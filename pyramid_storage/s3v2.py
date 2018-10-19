@@ -5,8 +5,6 @@ import mimetypes
 import tempfile
 import uuid
 
-from pyramid import compat
-from pyramid.settings import asbool
 from zope.interface import implementer
 
 from . import utils
@@ -55,13 +53,13 @@ class S3V2FileStorage(S3FileStorage):
         kwargs['aws_secret_access_key'] = kwargs.pop('secret_key')
         return cls(**kwargs)
 
-    def __init__(self, bucket_name, acl=None, base_url='',
-                 extensions='default', **conn_options):
-        self.bucket_name = bucket_name
-        self.acl = acl
-        self.base_url = base_url
-        self.extensions = resolve_extensions(extensions)
-        self.conn_options = conn_options
+    # def __init__(self, bucket_name, acl=None, base_url='',
+    #              extensions='default', **conn_options):
+    #     self.bucket_name = bucket_name
+    #     self.acl = acl
+    #     self.base_url = base_url
+    #     self.extensions = resolve_extensions(extensions)
+    #     self.conn_options = conn_options
 
     def get_connection(self):
         raise NotImplementedError()
@@ -222,7 +220,7 @@ class S3V2FileStorage(S3FileStorage):
 
     def move_file(self, src, dst):
         """
-        Move a file from a location to another (A copy folloeed by a delete of the source file
+        Move a file from a location to another (A copy followed by a delete of the source file
         :param src: key for source file
         :param dst: key for destination file
         :return:
