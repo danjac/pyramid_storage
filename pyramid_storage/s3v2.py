@@ -170,9 +170,9 @@ class S3V2FileStorage(S3FileStorage):
         file_object = bucket.Object(filename)
 
         if acl:
-            file_object.upload_fileobj(file, extra_args={'ACL': acl})
+            file_object.upload_fileobj(file, filename,  extra_args={'ACL': acl})
         else:
-            file_object.upload_fileobj(file)
+            file_object.upload_fileobj(file, filename)
 
         return filename
 
