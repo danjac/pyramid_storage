@@ -9,7 +9,6 @@ from zope.interface import implementer
 
 from . import utils
 from .exceptions import FileNotAllowed
-from .extensions import resolve_extensions
 from .interfaces import IFileStorage
 from .registry import register_file_storage_impl
 
@@ -52,14 +51,6 @@ class S3V2FileStorage(S3FileStorage):
         kwargs['aws_access_key_id'] = kwargs.pop('access_key')
         kwargs['aws_secret_access_key'] = kwargs.pop('secret_key')
         return cls(**kwargs)
-
-    # def __init__(self, bucket_name, acl=None, base_url='',
-    #              extensions='default', **conn_options):
-    #     self.bucket_name = bucket_name
-    #     self.acl = acl
-    #     self.base_url = base_url
-    #     self.extensions = resolve_extensions(extensions)
-    #     self.conn_options = conn_options
 
     def get_connection(self):
         raise NotImplementedError()
