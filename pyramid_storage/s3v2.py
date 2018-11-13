@@ -73,7 +73,8 @@ class S3V2FileStorage(S3FileStorage):
         if not options['host']:
             del options['host']
 
-        endpoint_url = '{}:{}'.format(options['host'], options['port']) if options['host'] and options['port'] else None
+        endpoint_url = '{}:{}'.format(options['host'],
+                                      options['port']) if 'host' in options and 'port' in options else None
 
         resource = boto3.resource('s3',
                                   endpoint_url=endpoint_url,
