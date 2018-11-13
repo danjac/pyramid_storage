@@ -65,8 +65,18 @@ class S3V2FileStorage(S3FileStorage):
 
         options = self.conn_options.copy()
 
+        if options['port']:
+            options['port'] = int(options['port'])
+        else:
+            del options['port']
+
+        if not options['host']:
+            del options['host']
+
+        endpoint_url = '{}:{}'.format(options['host'], options['port']) if options['host'] and options['port'] else None
+
         resource = boto3.resource('s3',
-                                  endpoint_url='{}:{}'.format(options['host'], options['port']),
+                                  endpoint_url=endpoint_url,
                                   aws_access_key_id=options['aws_access_key_id'],
                                   aws_secret_access_key=options['aws_secret_access_key'],
                                   config=Config(signature_version=options['signature_version']),

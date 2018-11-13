@@ -1,3 +1,21 @@
+2.0.1
+==================
+
+- Fixing endpoint overriding
+
+
+2.0.0
+==================
+
+- Addeded boto3 support with s3v2 module
+
+
+1.0.0
+==================
+- First Internal release
+- Added folter list do s3
+
+
 0.2.0 (unreleased)
 ==================
 
