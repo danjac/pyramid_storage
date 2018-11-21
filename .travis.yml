@@ -5,6 +5,8 @@ env:
     - TOX_ENV=py27
     - TOX_ENV=py35
     - TOX_ENV=flake8
+before_install:
+    - sudo rm -f /etc/boto.cfg
 install:
     - pip install tox
 script:
