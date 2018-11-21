@@ -61,6 +61,7 @@ setup(
     extras_require={
         'docs': docs_extras,
         's3': ["boto"],
+        "gcloud": ["google-cloud"],
     },
     test_suite='pyramid_storage',
     classifiers=[
