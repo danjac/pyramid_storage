@@ -36,25 +36,24 @@ class GCloudFileStorage(object):
     @classmethod
     def from_settings(cls, settings, prefix):
         options = (
+            ('gcloud.credentials', True, None),
             ('gcloud.bucket_name', True, None),
             ('gcloud.project_id', False, None),
             ('gcloud.acl', False, 'publicRead'),
             ('base_url', False, ''),
             ('extensions', False, 'default'),
             # Gcloud Connection options.
-            ('gcloud.credentials', False, os.getenv("GOOGLE_APPLICATION_CREDENTIALS")),
             ('gcloud.auto_create_bucket', False, False),
             ('gcloud.auto_create_acl', False, "projectPrivate"),
+            ('gcloud.cache_control', False, None),
         )
         kwargs = utils.read_settings(settings, options, prefix)
-        kwargs = dict([(k.replace('aws.', ''), v) for k, v in kwargs.items()])
-        kwargs['aws_access_key_id'] = kwargs.pop('access_key')
-        kwargs['aws_secret_access_key'] = kwargs.pop('secret_key')
+        kwargs = dict([(k.replace('gcloud.', ''), v) for k, v in kwargs.items()])
         return cls(**kwargs)
 
     def __init__(self, credentials, bucket_name, project_id=None, acl=None, base_url='',
                  extensions='default', auto_create_bucket=False, auto_create_acl="projectPrivate",
-                 **conn_options):
+                 cache_control=None):
         self.credentials = credentials
         self.bucket_name = bucket_name
         self.project_id = project_id
@@ -63,7 +62,10 @@ class GCloudFileStorage(object):
         self.extensions = resolve_extensions(extensions)
         self.auto_create_bucket = auto_create_bucket
         self.auto_create_acl = auto_create_acl
-        self.conn_options = conn_options
+        self.cache_control = cache_control
+
+        self._client = None
+        self._bucket = None
 
     def get_connection(self):
         if self._client is None:
@@ -211,8 +213,8 @@ class GCloudFileStorage(object):
         content_type, _ = mimetypes.guess_type(filename)
         content_type = content_type or 'application/octet-stream'
 
-        blob = self.get_bucket.get_blob(filename)
-        if not self.blob:
+        blob = self.get_bucket().get_blob(filename)
+        if not blob:
             blob = Blob(filename, self.get_bucket())
 
         blob.cache_control = self.cache_control
