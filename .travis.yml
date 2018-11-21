@@ -6,6 +6,8 @@ env:
     - TOX_ENV=py35
     - TOX_ENV=flake8
 before_install:
+    # Travis has got a default config, that we override for our tests.
+    # See: https://github.com/travis-ci/travis-ci/issues/7940
     - sudo rm -f /etc/boto.cfg
 install:
     - pip install tox
