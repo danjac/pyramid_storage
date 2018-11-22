@@ -213,7 +213,7 @@ Usage: s3 file storage
 .. warning::
     S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto``).
 
-	Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[s3]``
+    Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[s3]``
 
 .. warning::
     It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
@@ -252,7 +252,7 @@ Usage: gcloud file storage
 .. warning::
     Google Cloud Storage support requires you install the `google-cloud-storage`_ library separately (e.g. ``pip install google-cloud-storage``).
 
-	Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[gcloud]``
+    Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[gcloud]``
 
 .. warning::
     It is the responsibility of the deployment team to ensure that the application has the correct settings and permissions.
