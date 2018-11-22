@@ -11,7 +11,7 @@ Official docs:
 
 https://pythonhosted.org/pyramid_storage/
 
-Tested with python 2.6, 2.7, 3.4 and 3.5.
+Tested with python 2.6, 2.7, 3.5, 3.6 and 3.7.
 
 This package was inspired by the flask-uploads package:
 
