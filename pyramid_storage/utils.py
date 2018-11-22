@@ -35,8 +35,7 @@ def secure_filename(filename):
     # on nt a couple of special files are present in each folder. We
     # have to ensure that the target file is not such a filename. In
     # this case we prepend an underline
-    if (os.name == 'nt' and filename and
-       filename.split('.')[0].upper() in _windows_device_files):
+    if (os.name == 'nt' and filename and filename.split('.')[0].upper() in _windows_device_files):
         filename = '_' + filename
 
     return filename
