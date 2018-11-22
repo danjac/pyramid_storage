@@ -248,13 +248,13 @@ def test_from_settings_with_defaults():
 
     with mock.patch.object(gcloud, "Client") as gcloud_mocked:
         inst.get_connection()
-        _, gcloud_options = gcloud_mocked.call_args_list[0]
-        assert 'credentials' in gcloud_options
-        assert 'project' in gcloud_options
-        assert gcloud_options["project"] is None
+        _, gcloud_options = gcloud_mocked.from_service_account_json.call_args_list[0]
+        assert 'json_credentials_path' in gcloud_options
+        assert gcloud_options["json_credentials_path"] == '/secure/credentials.json'
 
         inst.get_bucket()
-        bucket_options, _ = gcloud_mocked.return_value.get_bucket.call_args_list[0]
+        bucket_options, _ = gcloud_mocked.from_service_account_json \
+            .return_value.get_bucket.call_args_list[0]
         assert "Attachments" in bucket_options
 
 

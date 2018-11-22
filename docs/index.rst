@@ -86,7 +86,7 @@ Setting                Default                Description
 ======================    =================      ==================================================================
 Setting                   Default                Description
 ======================    =================      ==================================================================
-**gcloud.credentials**    **required**           Path to JSON files containing the OAuth service keys.
+**gcloud.credentials**    **required**           Path to the Service Accounts credentials JSON file.
 **gcloud.bucket_name**    **required**           Google Cloud bucket
 **gcloud.acl**            ``publicRead``         `Google Cloud ACL permissions <https://cloud.google.com/storage/docs/access-control/making-data-public>`_
 **base_url**                                     Relative or absolute base URL for uploads; must end in slash ("/")

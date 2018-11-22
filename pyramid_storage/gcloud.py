@@ -38,7 +38,6 @@ class GCloudFileStorage(object):
         options = (
             ('gcloud.credentials', True, None),
             ('gcloud.bucket_name', True, None),
-            ('gcloud.project_id', False, None),
             ('gcloud.acl', False, 'publicRead'),
             ('base_url', False, ''),
             ('extensions', False, 'default'),
@@ -51,12 +50,11 @@ class GCloudFileStorage(object):
         kwargs = dict([(k.replace('gcloud.', ''), v) for k, v in kwargs.items()])
         return cls(**kwargs)
 
-    def __init__(self, credentials, bucket_name, project_id=None, acl=None, base_url='',
+    def __init__(self, credentials, bucket_name, acl=None, base_url='',
                  extensions='default', auto_create_bucket=False, auto_create_acl="projectPrivate",
                  cache_control=None):
         self.credentials = credentials
         self.bucket_name = bucket_name
-        self.project_id = project_id
         self.acl = acl
         self.base_url = base_url
         self.extensions = resolve_extensions(extensions)
@@ -69,10 +67,7 @@ class GCloudFileStorage(object):
 
     def get_connection(self):
         if self._client is None:
-            self._client = Client(
-                project=self.project_id,
-                credentials=self.credentials
-            )
+            self._client = Client.from_service_account_json(json_credentials_path=self.credentials)
         return self._client
 
     def get_bucket(self):
