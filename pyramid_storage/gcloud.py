@@ -214,6 +214,9 @@ class GCloudFileStorage(object):
         content_type = content_type or 'application/octet-stream'
 
         blob = self.get_bucket().get_blob(filename)
+        if blob and not replace:
+            return filename
+
         if not blob:
             blob = Blob(filename, self.get_bucket())
 
