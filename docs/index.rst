@@ -97,7 +97,7 @@ Group           Extensions
 ============    ==========================================
 any             **all** extensions (including no extensions)
 text            txt
-documents       pdf rtf odf ods gnumeric abw doc docx xls xls
+documents       pdf rtf odf ods gnumeric abw doc docx xls xlsx
 images          jpg jpe jpeg png gif svg bmp tiff
 audio           wav mp3 aac ogg oga flac
 video           mpeg 3gp avi divx dvr flv mp4 wmv
