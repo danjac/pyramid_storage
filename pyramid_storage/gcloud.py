@@ -23,7 +23,7 @@ except ImportError:
 
 def includeme(config):
 
-    impl = GCloudFileStorage.from_settings(
+    impl = GoogleCloudStorage.from_settings(
         config.registry.settings, prefix='storage.'
     )
 
@@ -31,7 +31,7 @@ def includeme(config):
 
 
 @implementer(IFileStorage)
-class GCloudFileStorage(object):
+class GoogleCloudStorage(object):
 
     @classmethod
     def from_settings(cls, settings, prefix):

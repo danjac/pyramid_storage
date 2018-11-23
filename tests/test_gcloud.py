@@ -36,7 +36,7 @@ def _mock_open(name='test', mode='wb', encoding="utf-8"):
 
 def test_extension_allowed_if_any():
     from pyramid_storage import gcloud
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="any"
@@ -46,7 +46,7 @@ def test_extension_allowed_if_any():
 
 def test_extension_allowed_if_allowed_if_dotted():
     from pyramid_storage import gcloud
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
@@ -56,7 +56,7 @@ def test_extension_allowed_if_allowed_if_dotted():
 
 def test_extension_not_allowed_if_allowed_if_dotted():
     from pyramid_storage import gcloud
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
@@ -66,7 +66,7 @@ def test_extension_not_allowed_if_allowed_if_dotted():
 
 def test_extension_not_allowed_if_allowed_if_not_dotted():
     from pyramid_storage import gcloud
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
@@ -79,7 +79,7 @@ def test_file_allowed():
 
     fs = mock.Mock()
     fs.filename = "test.jpg"
-    s = gcloud.GCloudFileStorage(
+    s = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
@@ -93,7 +93,7 @@ def test_file_not_allowed():
 
     fs = mock.Mock()
     fs.filename = "test.jpg"
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="documents"
@@ -108,7 +108,7 @@ def test_save_if_file_not_allowed():
 
     fs = mock.Mock()
     fs.filename = "test.jpg"
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="documents"
@@ -124,13 +124,13 @@ def test_save_if_file_allowed():
     fs = mock.Mock()
     fs.filename = "test.jpg"
 
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images")
 
     with mock.patch(
-            'pyramid_storage.gcloud.GCloudFileStorage.get_connection',
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
         name = g.save(fs)
     assert name == "test.jpg"
@@ -139,14 +139,14 @@ def test_save_if_file_allowed():
 def test_save_file():
     from pyramid_storage import gcloud
 
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
     )
 
     with mock.patch(
-            'pyramid_storage.gcloud.GCloudFileStorage.get_connection',
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
         name = g.save_file(mock.Mock(), "test.jpg")
     assert name == "test.jpg"
@@ -155,7 +155,7 @@ def test_save_file():
 def test_save_filename():
     from pyramid_storage import gcloud
 
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
@@ -164,7 +164,7 @@ def test_save_filename():
     patches = (
         mock.patch(_mock_open_name(), _mock_open),
         mock.patch(
-            'pyramid_storage.gcloud.GCloudFileStorage.get_connection',
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection
         )
     )
@@ -185,13 +185,13 @@ def test_save_if_randomize():
     fs = mock.Mock()
     fs.filename = "test.jpg"
 
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images")
 
     with mock.patch(
-            'pyramid_storage.gcloud.GCloudFileStorage.get_connection',
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
         name = g.save(fs, randomize=True)
     assert name != "test.jpg"
@@ -204,13 +204,13 @@ def test_save_in_folder():
     fs = mock.Mock()
     fs.filename = "test.jpg"
 
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images")
 
     with mock.patch(
-            'pyramid_storage.gcloud.GCloudFileStorage.get_connection',
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
         name = g.save(fs, folder="my_folder")
     assert name == "my_folder/test.jpg"
@@ -220,14 +220,14 @@ def test_delete():
 
     from pyramid_storage import gcloud
 
-    g = gcloud.GCloudFileStorage(
+    g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
         bucket_name="my_bucket",
         extensions="images"
     )
 
     with mock.patch(
-            'pyramid_storage.gcloud.GCloudFileStorage.get_connection',
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
 
         g.delete("test.jpg")
@@ -240,7 +240,7 @@ def test_from_settings_with_defaults():
         'storage.gcloud.credentials': '/secure/credentials.json',
         'storage.gcloud.bucket_name': 'Attachments',
     }
-    inst = gcloud.GCloudFileStorage.from_settings(settings, 'storage.')
+    inst = gcloud.GoogleCloudStorage.from_settings(settings, 'storage.')
     assert inst.base_url == ''
     assert inst.bucket_name == 'Attachments'
     assert inst.acl == 'publicRead'
@@ -261,4 +261,4 @@ def test_from_settings_with_defaults():
 def test_from_settings_if_base_path_missing():
     from pyramid_storage import gcloud
     with pytest.raises(pyramid_exceptions.ConfigurationError):
-        gcloud.GCloudFileStorage.from_settings({}, 'storage.')
+        gcloud.GoogleCloudStorage.from_settings({}, 'storage.')

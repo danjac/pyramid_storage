@@ -230,7 +230,7 @@ Basic usage is similar to **LocalFileStorage**::
         return HTTPSeeOther(request.route_url('home'))
 
 
-One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips. Instead you can pass the ``replace`` argument to replace the file on s3 (default is **False**)::
+One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips. Instead you can pass the ``replace`` argument to replace the file (default is **False**)::
 
 
     from pyramid.view import view_config
@@ -246,11 +246,11 @@ Alternatively you can use the ``randomize`` argument to ensure a (near) unique f
 
 The  ``storage.base_url`` setting should be set to ``//s3amazonaws.com/<my-bucket-name>/`` unless you want to serve the file behind a proxy or through your Pyramid application.
 
-Usage: gcloud file storage
-----------------------
+Usage: Google Cloud Storage
+---------------------------
 
 .. warning::
-    Google Cloud Storage support requires you install the `google-cloud-storage`_ library separately (e.g. ``pip install google-cloud-storage``).
+    Google Cloud Storage support requires you to install the `google-cloud-storage`_ library separately (e.g. ``pip install google-cloud-storage``).
 
     Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[gcloud]``
 
@@ -270,7 +270,7 @@ Basic usage is similar to **LocalFileStorage**::
 
 
 One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips.
-Instead you can pass the ``replace`` argument to replace the file on gcloud (default is **False**)::
+Instead you can pass the ``replace`` argument to replace the file (default is **False**)::
 
 
     from pyramid.view import view_config
@@ -334,7 +334,7 @@ API
 
 .. module:: pyramid_storage.gcloud
 
-.. autoclass:: GCloudFileStorage
+.. autoclass:: GoogleCloudStorage
    :members:
 
 .. module:: pyramid_storage.testing
