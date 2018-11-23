@@ -29,6 +29,9 @@ def includeme(config):
 
     register_file_storage_impl(config, impl)
 
+DEFAULT_BUCKET_ACL = "projectPrivate"
+DEFAULT_FILE_ACL = 'publicRead'
+
 
 @implementer(IFileStorage)
 class GoogleCloudStorage(object):
@@ -38,12 +41,12 @@ class GoogleCloudStorage(object):
         options = (
             ('gcloud.credentials', True, None),
             ('gcloud.bucket_name', True, None),
-            ('gcloud.acl', False, 'publicRead'),
+            ('gcloud.acl', False, DEFAULT_FILE_ACL),
             ('base_url', False, ''),
             ('extensions', False, 'default'),
             # Gcloud Connection options.
             ('gcloud.auto_create_bucket', False, False),
-            ('gcloud.auto_create_acl', False, "projectPrivate"),
+            ('gcloud.auto_create_acl', False, DEFAULT_BUCKET_ACL),
             ('gcloud.cache_control', False, None),
         )
         kwargs = utils.read_settings(settings, options, prefix)
@@ -51,8 +54,8 @@ class GoogleCloudStorage(object):
         return cls(**kwargs)
 
     def __init__(self, credentials, bucket_name, acl=None, base_url='',
-                 extensions='default', auto_create_bucket=False, auto_create_acl="projectPrivate",
-                 cache_control=None):
+                 extensions='default', auto_create_bucket=False,
+                 auto_create_acl=DEFAULT_BUCKET_ACL, cache_control=None):
         self.credentials = credentials
         self.bucket_name = bucket_name
         self.acl = acl
@@ -209,16 +212,19 @@ class GoogleCloudStorage(object):
         content_type = content_type or 'application/octet-stream'
 
         blob = self.get_bucket().get_blob(filename)
+        # If the file exist and we explicitely asked not to replace it: ignore it.
         if blob and not replace:
             return filename
 
+        # If the file doesn't exist: create it.
         if not blob:
             blob = Blob(filename, self.get_bucket())
 
         blob.cache_control = self.cache_control
         file.seek(0)
+        import pdb; pdb.set_trace()
         blob.upload_from_file(file, rewind=True, content_type=content_type)
 
         acl = acl or self.acl
-        blob.acl.save_predefined(self.acl)
+        blob.acl.save_predefined(acl)
         return filename
