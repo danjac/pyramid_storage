@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from io import BytesIO
 import mock
 import pytest
 
@@ -10,7 +10,9 @@ from pyramid import exceptions as pyramid_exceptions
 class MockGCloudConnection(object):
 
     def get_bucket(self, bucket_name):
-        return mock.Mock()
+        bucket = mock.MagicMock()
+        bucket.get_blob.return_value = None
+        return bucket
 
 
 def _get_mock_gcloud_connection(self):
@@ -29,7 +31,7 @@ def _mock_open(name='test', mode='wb', encoding="utf-8"):
 
     obj = mock.Mock()
     obj.__enter__ = mock.Mock()
-    obj.__enter__.return_value = mock.Mock()
+    obj.__enter__.return_value = BytesIO()
     obj.__exit__ = mock.Mock()
     return obj
 
@@ -132,7 +134,9 @@ def test_save_if_file_allowed():
     with mock.patch(
             'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
-        name = g.save(fs)
+        with mock.patch('pyramid_storage.gcloud.Blob') as mocked_new_blob:
+            name = g.save(fs)
+            assert mocked_new_blob.return_value.upload_from_file.called
     assert name == "test.jpg"
 
 
@@ -148,7 +152,9 @@ def test_save_file():
     with mock.patch(
             'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
-        name = g.save_file(mock.Mock(), "test.jpg")
+        with mock.patch('pyramid_storage.gcloud.Blob') as mocked_new_blob:
+            name = g.save_file(BytesIO(), "test.jpg")
+            assert mocked_new_blob.return_value.upload_from_file.called
     assert name == "test.jpg"
 
 
@@ -172,8 +178,10 @@ def test_save_filename():
     for patch in patches:
         patch.start()
 
-    name = g.save_filename("test.jpg")
-    assert name == "test.jpg"
+    with mock.patch('pyramid_storage.gcloud.Blob') as mocked_new_blob:
+        name = g.save_filename("test.jpg", replace=True)
+        assert name == "test.jpg"
+        assert mocked_new_blob.return_value.upload_from_file.called
 
     for patch in patches:
         patch.stop()
@@ -193,7 +201,9 @@ def test_save_if_randomize():
     with mock.patch(
             'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
-        name = g.save(fs, randomize=True)
+        with mock.patch('pyramid_storage.gcloud.Blob') as mocked_new_blob:
+            name = g.save(fs, randomize=True)
+            assert mocked_new_blob.return_value.upload_from_file.called
     assert name != "test.jpg"
 
 
@@ -201,8 +211,9 @@ def test_save_in_folder():
 
     from pyramid_storage import gcloud
 
-    fs = mock.Mock()
+    fs = mock.MagicMock()
     fs.filename = "test.jpg"
+    fs.file = BytesIO()
 
     g = gcloud.GoogleCloudStorage(
         credentials="/secrets/credentials.json",
@@ -212,7 +223,9 @@ def test_save_in_folder():
     with mock.patch(
             'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection):
-        name = g.save(fs, folder="my_folder")
+        with mock.patch('pyramid_storage.gcloud.Blob') as mocked_new_blob:
+            name = g.save(fs, folder="my_folder")
+            assert mocked_new_blob.return_value.upload_from_file.called
     assert name == "my_folder/test.jpg"
 
 

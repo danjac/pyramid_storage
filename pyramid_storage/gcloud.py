@@ -180,7 +180,6 @@ class GoogleCloudStorage(object):
         :param acl: ACL policy (if None then uses default)
         :returns: modified filename
         """
-
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
     def save_file(self, file, filename, folder=None, randomize=False,
@@ -212,6 +211,7 @@ class GoogleCloudStorage(object):
         content_type = content_type or 'application/octet-stream'
 
         blob = self.get_bucket().get_blob(filename)
+
         # If the file exist and we explicitely asked not to replace it: ignore it.
         if blob and not replace:
             return filename
@@ -222,7 +222,6 @@ class GoogleCloudStorage(object):
 
         blob.cache_control = self.cache_control
         file.seek(0)
-        import pdb; pdb.set_trace()
         blob.upload_from_file(file, rewind=True, content_type=content_type)
 
         acl = acl or self.acl
