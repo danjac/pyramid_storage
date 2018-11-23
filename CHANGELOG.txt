@@ -4,6 +4,11 @@
 **New features**
 
 - Add support for Google Cloud Storage backend.
+- Add .xlsx in documents extensions
+
+**Internal changes**
+
+- Update test matrix on CI 
 
 0.1.2 (2016-02-18)
 ==================
