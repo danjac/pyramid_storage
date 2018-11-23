@@ -29,6 +29,7 @@ def includeme(config):
 
     register_file_storage_impl(config, impl)
 
+
 DEFAULT_BUCKET_ACL = "projectPrivate"
 DEFAULT_FILE_ACL = 'publicRead'
 
