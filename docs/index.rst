@@ -81,6 +81,19 @@ Setting                Default                Description
 **timeout**            ``5``                  HTTP socket timeout in seconds
 ===================    =================      ==================================================================
 
+**Google Cloud file storage**
+
+======================    =================      ==================================================================
+Setting                   Default                Description
+======================    =================      ==================================================================
+**gcloud.credentials**    **required**           Path to the Service Accounts credentials JSON file.
+**gcloud.bucket_name**    **required**           Google Cloud bucket
+**gcloud.acl**            ``publicRead``         `Google Cloud ACL permissions <https://cloud.google.com/storage/docs/access-control/making-data-public>`_
+**base_url**                                     Relative or absolute base URL for uploads; must end in slash ("/")
+**extensions**            ``default``            List of extensions or extension groups (see below)
+**name**                  ``storage``            Name of property added to request, e.g. **request.storage**
+=====================     =================      ==================================================================
+
 
 **Configuring extensions:** extensions are given as a list of space-separated extensions or groups of extensions. These groups provide a convenient
 shortcut for including a large number of extensions. Each group must be separated by a plus-sign "+". Some examples:
@@ -195,10 +208,12 @@ You may not wish to provide public access to files - for example users may uploa
         return FileResponse(request.storage.path(filename))
 
 Usage: s3 file storage
--------------------------
+----------------------
 
 .. warning::
-    S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto``). As of writing this library is not Python 3 compatible.
+    S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto``).
+
+    Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[s3]``
 
 .. warning::
     It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
@@ -215,7 +230,7 @@ Basic usage is similar to **LocalFileStorage**::
         return HTTPSeeOther(request.route_url('home'))
 
 
-One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips. Instead you can pass the ``replace`` argument to replace the file on s3 (default is **False**)::
+One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips. Instead you can pass the ``replace`` argument to replace the file (default is **False**)::
 
 
     from pyramid.view import view_config
@@ -230,6 +245,46 @@ One difference is that filenames are not resolved with a numeric suffix as with 
 Alternatively you can use the ``randomize`` argument to ensure a (near) unique filename.
 
 The  ``storage.base_url`` setting should be set to ``//s3amazonaws.com/<my-bucket-name>/`` unless you want to serve the file behind a proxy or through your Pyramid application.
+
+Usage: Google Cloud Storage
+---------------------------
+
+.. warning::
+    Google Cloud Storage support requires you to install the `google-cloud-storage`_ library separately (e.g. ``pip install google-cloud-storage``).
+
+    Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[gcloud]``
+
+.. warning::
+    It is the responsibility of the deployment team to ensure that the application has the correct settings and permissions.
+
+Basic usage is similar to **LocalFileStorage**::
+
+    from pyramid.view import view_config
+    from pyramid.httpexceptions import HTTPSeeOther
+
+    @view_config(route_name='upload',
+                 request_method='POST')
+    def upload(request):
+        request.storage.save(request.POST['my_file'])
+        return HTTPSeeOther(request.route_url('home'))
+
+
+One difference is that filenames are not resolved with a numeric suffix as with local files, to prevent network round-trips.
+Instead you can pass the ``replace`` argument to replace the file (default is **False**)::
+
+
+    from pyramid.view import view_config
+    from pyramid.httpexceptions import HTTPSeeOther
+
+    @view_config(route_name='upload',
+                 request_method='POST')
+    def upload(request):
+        request.storage.save(request.POST['my_file'], replace=True)
+        return HTTPSeeOther(request.route_url('home'))
+
+Alternatively you can use the ``randomize`` argument to ensure a (near) unique filename.
+
+The  ``storage.base_url`` setting should be set to ``//storage.googleapis.com/<my-bucket-name>/`` unless you want to serve the file behind a CDN or through your Pyramid application.
 
 Testing
 -------
@@ -277,6 +332,11 @@ API
 .. autoclass:: S3FileStorage
    :members:
 
+.. module:: pyramid_storage.gcloud
+
+.. autoclass:: GoogleCloudStorage
+   :members:
+
 .. module:: pyramid_storage.testing
 
 .. autoclass:: DummyFileStorage
@@ -285,3 +345,4 @@ API
 .. _Boto: http://pypi.python.org/pypi/boto/
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _Github: https://github.com/danjac/pyramid_storage
+.. _google-cloud-storage: https://github.com/googleapis/google-cloud-python

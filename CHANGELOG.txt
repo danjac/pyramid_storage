@@ -1,8 +1,9 @@
 0.2.0 (unreleased)
 ==================
 
-- Nothing changed yet.
+**New features**
 
+- Add support for Google Cloud Storage backend.
 
 0.1.2 (2016-02-18)
 ==================
