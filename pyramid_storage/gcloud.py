@@ -223,8 +223,6 @@ class GoogleCloudStorage(object):
 
         blob.cache_control = self.cache_control
         file.seek(0)
-        blob.upload_from_file(file, rewind=True, content_type=content_type)
-
         acl = acl or self.acl
-        blob.acl.save_predefined(acl)
+        blob.upload_from_file(file, rewind=True, content_type=content_type, predefined_acl=acl)
         return filename
