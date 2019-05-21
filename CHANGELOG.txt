@@ -1,4 +1,4 @@
-0.3.0 (unreleased)
+0.3.0 (2019-05-21)
 ==================
 
 - Merge file upload and acl update requests with the Google Cloud backend. (#36)
