@@ -214,17 +214,15 @@ class S3FileStorage(object):
         if folder:
             filename = folder + "/" + filename
 
-        content_type, _ = mimetypes.guess_type(filename)
-        content_type = content_type or 'application/octet-stream'
-
-        headers.update({
-            'Content-Type': content_type,
-        })
+        content_type = headers.get('Content-Type')
+        if content_type is None:
+            content_type, _ = mimetypes.guess_type(filename)
+            content_type = content_type or 'application/octet-stream'
+            headers['Content-Type'] = content_type
 
         bucket = self.get_bucket()
 
         key = bucket.get_key(filename) or bucket.new_key(filename)
-        key.set_metadata('Content-Type', content_type)
 
         file.seek(0)
 

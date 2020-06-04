@@ -212,6 +212,26 @@ def test_save_in_folder():
     assert name == "my_folder/test.jpg"
 
 
+def test_save_with_content_type():
+
+    from pyramid_storage import s3
+
+    fs = mock.Mock()
+    fs.filename = "test.doc"
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="documents")
+
+    with mock.patch(
+        'pyramid_storage.s3.S3FileStorage.get_connection') as mocked:
+        name = s.save(fs, headers={"Content-Type": "text/html"})
+    call = mocked.return_value.get_bucket.return_value.get_key.return_value.set_contents_from_file.call_args_list
+    assert call[0][1]["headers"]["Content-Type"] == "text/html"
+
+
 def test_delete():
 
     from pyramid_storage import s3
