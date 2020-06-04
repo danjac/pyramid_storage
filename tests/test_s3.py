@@ -234,8 +234,8 @@ def test_save_with_content_type():
     with mock.patch(
         'pyramid_storage.s3.S3FileStorage.get_connection') as mocked:
         name = s.save(fs, headers={"Content-Type": "text/html"})
-    call = mocked.return_value.get_bucket.return_value.get_key.return_value.set_metadata.call_args_list
-    assert call == [mock.call('Content-Type', 'text/html')]
+    call = mocked.return_value.get_bucket.return_value.get_key.return_value.set_contents_from_file.call_args_list
+    assert call[0][1]["headers"]["Content-Type"] == "text/html"
 
 
 def test_delete():

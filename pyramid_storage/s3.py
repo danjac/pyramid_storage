@@ -223,7 +223,6 @@ class S3FileStorage(object):
         bucket = self.get_bucket()
 
         key = bucket.get_key(filename) or bucket.new_key(filename)
-        key.set_metadata('Content-Type', content_type)
 
         file.seek(0)
 
