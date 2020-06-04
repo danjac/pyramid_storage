@@ -7,12 +7,6 @@ from pyramid import compat
 from pyramid import exceptions as pyramid_exceptions
 
 
-class MockBucket(object):
-
-    def get_key(self, key):
-        return mock.Mock()
-
-
 class MockS3Connection(object):
 
     def get_bucket(self, bucket_name):
