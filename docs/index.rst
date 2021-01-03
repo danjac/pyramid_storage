@@ -42,6 +42,14 @@ alternatively::
 
     config.include('pyramid_storage.s3')
 
+If you are configuring a pyramid async setup and require all drivers to be async aware, use::
+
+    pyramid.includes =
+        pyramid_storage.s3_async
+
+or::
+
+    config.include('pyramid_storage.s3_async')
 
 Configuration
 -------------
@@ -79,6 +87,30 @@ Setting                Default                Description
 **region**             ``None``               Region identifier, *host* and *port* will be ignored
 **num_retries**        ``1``                  Number of retry for connection errors
 **timeout**            ``5``                  HTTP socket timeout in seconds
+===================    =================      ==================================================================
+
+**S3 Async file storage**
+
+===================    =================      ==================================================================
+Setting                Default                Description
+===================    =================      ==================================================================
+**aws.access_key**     **required**           AWS access key
+**aws.secret_key**     **required**           AWS secret key
+**aws.bucket_name**    **required**           AWS bucket
+**aws.acl**            ``public-read``        `AWS ACL permissions <https://github.com/boto/boto/blob/v2.13.2/boto/s3/acl.py#L25-L28>`_
+**base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
+**extensions**         ``default``            List of extensions or extension groups (see below)
+**name**               ``storage``            Name of property added to request, e.g. **request.storage**
+
+**use_path_style**     ``False``              Use paths for buckets instead of subdomains (useful for testing)
+**is_secure**          ``True``               Use ``https`` when a Host is defined
+**host**               ``None``               Host for Amazon S3 server (eg. `localhost`)
+**port**               ``None``               Port for Amazon S3 server (eg. `5000`)
+**region**             ``None``               Region identifier, *is_secure*, *host* and *port* will be ignored
+**num_retries**        ``5``                  Number of retry for connection errors
+**timeout**            ``5``                  HTTP socket connection timeout in seconds
+**read_timeout**       ``10``                 Timeout when reading from the HTTP socket in seconds
+**keepalive_timeout**  ``12``                 Number of seconds before closing the aiohttp Keep-Alive connection
 ===================    =================      ==================================================================
 
 **Google Cloud file storage**
@@ -246,6 +278,28 @@ Alternatively you can use the ``randomize`` argument to ensure a (near) unique f
 
 The  ``storage.base_url`` setting should be set to ``//s3amazonaws.com/<my-bucket-name>/`` unless you want to serve the file behind a proxy or through your Pyramid application.
 
+Usage: s3 async file storage
+----------------------
+
+.. warning::
+    S3 support requires you install the `aioboto3`_ and `aiofile`_ library separately (e.g. ``pip install aioboto3 aiofile``).
+
+    Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[s3_async]``
+
+.. warning::
+    It is the responsibility of the deployment team to ensure that the application has the correct AWS settings and permissions.
+
+Basic usage is similar to **S3FileStorage**, but every file operation must be await'ed::
+
+    from pyramid.view import view_config
+    from pyramid.httpexceptions import HTTPSeeOther
+
+    @view_config(route_name='upload',
+                 request_method='POST')
+    async def upload(request):
+        await request.storage.save(request.POST['my_file'])
+        return HTTPSeeOther(request.route_url('home'))
+
 Usage: Google Cloud Storage
 ---------------------------
 
@@ -330,6 +384,9 @@ API
 .. module:: pyramid_storage.s3
 
 .. autoclass:: S3FileStorage
+   :members:
+
+.. autoclass:: S3AsyncFileStorage
    :members:
 
 .. module:: pyramid_storage.gcloud

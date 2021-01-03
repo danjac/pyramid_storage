@@ -36,6 +36,8 @@ docs_extras = [
 tests_require = [
     'pytest',
     'mock',
+    'pytest-mock',
+    'pytest-asyncio',
 ]
 
 
@@ -61,6 +63,7 @@ setup(
     extras_require={
         'docs': docs_extras,
         's3': ['boto'],
+        's3_async': ['aioboto3', 'aiofile'],
         'gcloud': ['google-cloud-storage'],
     },
     test_suite='pyramid_storage',
