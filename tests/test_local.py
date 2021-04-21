@@ -4,16 +4,7 @@ import os
 import mock
 import pytest
 
-from pyramid import compat
 from pyramid import exceptions as pyramid_exceptions
-
-
-def _mock_open_name():
-
-    if compat.PY3:
-        return 'builtins.open'
-    else:
-        return '__builtin__.open'
 
 
 def _mock_open(name='test', mode='wb'):
@@ -87,7 +78,7 @@ def test_save_if_file_allowed():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch('builtins.open', _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -109,7 +100,7 @@ def test_save_file():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch('builtins.open', _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -131,7 +122,7 @@ def test_save_filename():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch('builtins.open', _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -156,7 +147,7 @@ def test_save_if_randomize():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch('builtins.open', _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -182,7 +173,7 @@ def test_save_in_folder():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch(_mock_open_name()), _mock_open(),
+        mock.patch('builtins.open'), _mock_open(),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),

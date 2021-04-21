@@ -2,8 +2,8 @@
 
 import os
 import mimetypes
+import urllib
 
-from pyramid import compat
 from pyramid.settings import asbool
 from zope.interface import implementer
 
@@ -104,7 +104,7 @@ class S3FileStorage(object):
 
         :param filename: base name of file
         """
-        return compat.urlparse.urljoin(self.base_url, filename)
+        return urllib.parse.urljoin(self.base_url, filename)
 
     def exists(self, filename):
         return self.get_bucket().new_key(filename).exists()

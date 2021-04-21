@@ -1,6 +1,5 @@
 import os
-
-from pyramid import compat
+import urllib
 
 
 class DummyFileStorage(object):
@@ -20,4 +19,4 @@ class DummyFileStorage(object):
 
     def url(self, filename):
         """Return a fake URL"""
-        return compat.urlparse.urljoin(self.base_url, filename)
+        return urllib.parse.urljoin(self.base_url, filename)
