@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid import compat
-
 
 def test_secure_filename():
 
@@ -9,10 +7,7 @@ def test_secure_filename():
     assert secure_filename('My cool movie.mov') == 'My_cool_movie.mov'
     assert secure_filename('../../../etc/passwd') == 'etc_passwd'
 
-    if compat.PY3:
-        target = 'i_contain_cool_umlauts.txt'
-    else:
-        target = 'i_contain_cool_mluts.txt'
+    target = 'i_contain_cool_umlauts.txt'
 
     assert secure_filename(
         'i contain cool \xfcml\xe4uts.txt') == target

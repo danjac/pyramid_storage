@@ -3,7 +3,6 @@ from io import BytesIO
 import mock
 import pytest
 
-from pyramid import compat
 from pyramid import exceptions as pyramid_exceptions
 
 
@@ -17,14 +16,6 @@ class MockGCloudConnection(object):
 
 def _get_mock_gcloud_connection(self):
     return MockGCloudConnection()
-
-
-def _mock_open_name():
-
-    if compat.PY3:
-        return 'builtins.open'
-    else:
-        return '__builtin__.open'
 
 
 def _mock_open(name='test', mode='wb', encoding="utf-8"):
@@ -168,7 +159,7 @@ def test_save_filename():
     )
 
     patches = (
-        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch('builtins.open', _mock_open),
         mock.patch(
             'pyramid_storage.gcloud.GoogleCloudStorage.get_connection',
             _get_mock_gcloud_connection

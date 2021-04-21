@@ -2,8 +2,8 @@
 
 import os
 import shutil
+import urllib
 
-from pyramid import compat
 from zope.interface import implementer
 
 from . import utils
@@ -58,7 +58,7 @@ class LocalFileStorage(object):
 
         :param filename: base name of file
         """
-        return compat.urlparse.urljoin(self.base_url, filename)
+        return urllib.parse.urljoin(self.base_url, filename)
 
     def path(self, filename):
         """Returns absolute file path of the filename, joined to the

@@ -5,7 +5,6 @@ import re
 import uuid
 import unicodedata
 
-from pyramid import compat
 from pyramid import exceptions as pyramid_exceptions
 
 
@@ -21,11 +20,10 @@ def secure_filename(filename):
 
     :param filename: the filename to secure
     """
-    if isinstance(filename, compat.text_type):
+    if isinstance(filename, str):
         filename = unicodedata.normalize(
             'NFKD', filename).encode('ascii', 'ignore')
-        if compat.PY3:
-            filename = filename.decode('ascii')
+        filename = filename.decode('ascii')
     for sep in os.path.sep, os.path.altsep:
         if sep:
             filename = filename.replace(sep, ' ')

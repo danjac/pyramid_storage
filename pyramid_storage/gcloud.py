@@ -2,8 +2,8 @@
 
 import os
 import mimetypes
+import urllib
 
-from pyramid import compat
 from zope.interface import implementer
 
 from . import utils
@@ -100,7 +100,7 @@ class GoogleCloudStorage(object):
 
         :param filename: base name of file
         """
-        return compat.urlparse.urljoin(self.base_url, filename)
+        return urllib.parse.urljoin(self.base_url, filename)
 
     def exists(self, name):
         if not name:  # root element aka the bucket

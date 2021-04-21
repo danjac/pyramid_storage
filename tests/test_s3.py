@@ -3,7 +3,6 @@
 import mock
 import pytest
 
-from pyramid import compat
 from pyramid import exceptions as pyramid_exceptions
 
 
@@ -15,14 +14,6 @@ class MockS3Connection(object):
 
 def _get_mock_s3_connection(self):
     return MockS3Connection()
-
-
-def _mock_open_name():
-
-    if compat.PY3:
-        return 'builtins.open'
-    else:
-        return '__builtin__.open'
 
 
 def _mock_open(name='test', mode='wb'):
@@ -156,7 +147,7 @@ def test_save_filename():
         extensions="images")
 
     patches = (
-        mock.patch(_mock_open_name(), _mock_open),
+        mock.patch('builtins.open', _mock_open),
         mock.patch(
             'pyramid_storage.s3.S3FileStorage.get_connection',
             _get_mock_s3_connection
