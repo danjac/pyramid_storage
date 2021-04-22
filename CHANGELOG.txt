@@ -3,8 +3,18 @@
 
 **Breaking changes**
 
-- Drop support for Python 2.6, Python 2.7 and Python 3.5
-- Add support for Python 3.6+
+- Drop support for Python 2.6, Python 2.7 and Python 3.5 (#42)
+- Add support for Python 3.6+ (#42)
+
+**Bug fixes**
+
+- Fix Pyramid 2 support (#44)
+- Allow empty tuple for ANY extension (#33)
+
+**Internal changes**
+
+- Move from Travis to Github workflows
+- testing: Add ``DummyFileStorage.url`` (#22)
 
 
 0.3.1 (2020-06-04)
@@ -31,7 +41,7 @@
 
 **Internal changes**
 
-- Update test matrix on CI 
+- Update test matrix on CI
 
 0.1.2 (2016-02-18)
 ==================
