@@ -96,8 +96,8 @@ class S3FileStorage(object):
         conn.http_connection_kwargs['timeout'] = timeout
         return conn
 
-    def get_bucket(self):
-        return self.get_connection().get_bucket(self.bucket_name)
+    def get_bucket(self, bucket_name=None):
+        return self.get_connection().get_bucket(bucket_name or self.bucket_name)
 
     def url(self, filename):
         """Returns entire URL of the filename, joined to the base_url
@@ -106,17 +106,18 @@ class S3FileStorage(object):
         """
         return urllib.parse.urljoin(self.base_url, filename)
 
-    def exists(self, filename):
-        return self.get_bucket().new_key(filename).exists()
+    def exists(self, filename, bucket_name=None):
+        return self.get_bucket(bucket_name).new_key(filename).exists()
 
-    def delete(self, filename):
+    def delete(self, filename, bucket_name=None):
         """Deletes the filename. Filename is resolved with the
         absolute path based on base_path. If file does not exist,
         returns **False**, otherwise **True**
 
         :param filename: base name of file
+        :param bucket_name: name of the bucket, if not default
         """
-        self.get_bucket().delete_key(filename)
+        self.get_bucket(bucket_name).delete_key(filename)
 
     def filename_allowed(self, filename, extensions=None):
         """Checks if a filename has an allowed extension
@@ -185,11 +186,12 @@ class S3FileStorage(object):
 
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
-    def save_file(self, file, filename, folder=None, randomize=False,
+    def save_file(self, file, filename, folder=None, bucket_name=None, randomize=False,
                   extensions=None, acl=None, replace=False, headers=None):
         """
         :param filename: local filename
         :param folder: relative path of sub-folder
+        :param bucket_name: name of the bucket, if not default
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
         :param acl: ACL policy (if None then uses default)
@@ -220,7 +222,7 @@ class S3FileStorage(object):
             content_type = content_type or 'application/octet-stream'
             headers['Content-Type'] = content_type
 
-        bucket = self.get_bucket()
+        bucket = self.get_bucket(bucket_name)
 
         key = bucket.get_key(filename) or bucket.new_key(filename)
 
