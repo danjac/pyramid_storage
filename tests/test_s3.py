@@ -328,3 +328,56 @@ def test_from_settings_with_regional_options_ignores_host_port():
         _, boto_options = boto_mocked.call_args_list[0]
         assert 'host' not in boto_options
         assert 'port' not in boto_options
+
+
+def test_get_bucket():
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection') as mocked:
+        my_bucket = s.get_bucket()
+        other_bucket = s.get_bucket("other_bucket")
+    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
+    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
+
+
+def test_save_file_to_bucket():
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection') as mocked:
+        s.save_file(mock.Mock(), "test.jpg")
+        s.save_file(mock.Mock(), "test.jpg", bucket_name="other_bucket")
+    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
+    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
+    # make sure saving to another bucket doesn't change the default
+    assert s.bucket_name == "my_bucket"
+
+
+def test_delete_from_bucket():
+    from pyramid_storage import s3
+
+    s = s3.S3FileStorage(
+        access_key="AK",
+        secret_key="SK",
+        bucket_name="my_bucket",
+        extensions="images")
+
+    with mock.patch(
+            'pyramid_storage.s3.S3FileStorage.get_connection') as mocked:
+        s.delete("test.jpg")
+        s.delete("test.jpg", bucket_name="other_bucket")
+    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
+    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
