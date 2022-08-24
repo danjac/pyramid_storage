@@ -74,9 +74,11 @@ class GoogleCloudStorage(object):
             self._client = Client.from_service_account_json(json_credentials_path=self.credentials)
         return self._client
 
-    def get_bucket(self):
+    def get_bucket(self, bucket_name=None):
         if self._bucket is None:
             self._bucket = self._get_or_create_bucket(self.bucket_name)
+        if bucket_name and bucket_name != self.bucket_name:
+            return self._get_or_create_bucket(bucket_name)
         return self._bucket
 
     def _get_or_create_bucket(self, name):
@@ -102,24 +104,25 @@ class GoogleCloudStorage(object):
         """
         return urllib.parse.urljoin(self.base_url, filename)
 
-    def exists(self, name):
+    def exists(self, name, bucket_name=None):
         if not name:  # root element aka the bucket
             try:
-                self.get_bucket()
+                self.get_bucket(bucket_name)
                 return True
             except RuntimeError:
                 return False
 
-        return bool(self.get_bucket().get_blob(name))
+        return bool(self.get_bucket(bucket_name).get_blob(name))
 
-    def delete(self, filename):
+    def delete(self, filename, bucket_name=None):
         """Deletes the filename. Filename is resolved with the
         absolute path based on base_path. If file does not exist,
         returns **False**, otherwise **True**
 
         :param filename: base name of file
+        :param bucket_name: name of bucket, if not default
         """
-        self.get_bucket().delete_blob(filename)
+        self.get_bucket(bucket_name).delete_blob(filename)
 
     def filename_allowed(self, filename, extensions=None):
         """Checks if a filename has an allowed extension
@@ -183,11 +186,12 @@ class GoogleCloudStorage(object):
         """
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
-    def save_file(self, file, filename, folder=None, randomize=False,
+    def save_file(self, file, filename, folder=None, bucket_name=None, randomize=False,
                   extensions=None, acl=None, replace=False, headers=None):
         """
         :param filename: local filename
         :param folder: relative path of sub-folder
+        :param bucket_name: name of the bucket, if not default
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
         :param acl: ACL policy (if None then uses default)
@@ -211,7 +215,7 @@ class GoogleCloudStorage(object):
         content_type, _ = mimetypes.guess_type(filename)
         content_type = content_type or 'application/octet-stream'
 
-        blob = self.get_bucket().get_blob(filename)
+        blob = self.get_bucket(bucket_name).get_blob(filename)
 
         # If the file exist and we explicitely asked not to replace it: ignore it.
         if blob and not replace:
@@ -219,7 +223,7 @@ class GoogleCloudStorage(object):
 
         # If the file doesn't exist: create it.
         if not blob:
-            blob = Blob(filename, self.get_bucket())
+            blob = Blob(filename, self.get_bucket(bucket_name))
 
         blob.cache_control = self.cache_control
         file.seek(0)
