@@ -266,3 +266,56 @@ def test_from_settings_if_base_path_missing():
     from pyramid_storage import gcloud
     with pytest.raises(pyramid_exceptions.ConfigurationError):
         gcloud.GoogleCloudStorage.from_settings({}, 'storage.')
+
+
+def test_get_bucket():
+    from pyramid_storage import gcloud
+
+    g = gcloud.GoogleCloudStorage(
+        credentials="/secrets/credentials.json",
+        bucket_name="my_bucket",
+        extensions="images"
+    )
+
+    with mock.patch(
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection') as mocked:
+        my_bucket = g.get_bucket()
+        other_bucket = g.get_bucket("other_bucket")
+    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
+    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
+
+
+def test_save_file_to_bucket():
+    from pyramid_storage import gcloud
+
+    g = gcloud.GoogleCloudStorage(
+        credentials="/secrets/credentials.json",
+        bucket_name="my_bucket",
+        extensions="images"
+    )
+
+    with mock.patch(
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection') as mocked:
+        g.save_file(mock.Mock(), "test.jpg")
+        g.save_file(mock.Mock(), "test.jpg", bucket_name="other_bucket")
+    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
+    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
+    # make sure saving to another bucket doesn't change the default
+    assert g.bucket_name == "my_bucket"
+
+
+def test_delete_from_bucket():
+    from pyramid_storage import gcloud
+
+    g = gcloud.GoogleCloudStorage(
+        credentials="/secrets/credentials.json",
+        bucket_name="my_bucket",
+        extensions="images"
+    )
+
+    with mock.patch(
+            'pyramid_storage.gcloud.GoogleCloudStorage.get_connection') as mocked:
+        g.delete("test.jpg")
+        g.delete("test.jpg", bucket_name="other_bucket")
+    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
+    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
