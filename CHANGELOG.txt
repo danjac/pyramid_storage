@@ -1,7 +1,9 @@
 1.0.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+**New features**
+
+- Add support for managing files in buckets other than default (#46)
 
 
 1.0.0 (2021-04-22)
