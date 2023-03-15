@@ -241,24 +241,54 @@ def test_from_settings_with_defaults():
     from pyramid_storage import gcloud
 
     settings = {
-        'storage.gcloud.credentials': '/secure/credentials.json',
         'storage.gcloud.bucket_name': 'Attachments',
     }
+
     inst = gcloud.GoogleCloudStorage.from_settings(settings, 'storage.')
+
     assert inst.base_url == ''
-    assert inst.bucket_name == 'Attachments'
+    assert inst.bucket_name == settings["storage.gcloud.bucket_name"]
     assert inst.acl == 'publicRead'
     assert set(('jpg', 'txt', 'doc')).intersection(inst.extensions)
 
     with mock.patch.object(gcloud, "Client") as gcloud_mocked:
         inst.get_connection()
-        _, gcloud_options = gcloud_mocked.from_service_account_json.call_args_list[0]
-        assert 'json_credentials_path' in gcloud_options
-        assert gcloud_options["json_credentials_path"] == '/secure/credentials.json'
+
+        assert gcloud_mocked.call_count == 1
 
         inst.get_bucket()
-        bucket_options, _ = gcloud_mocked.from_service_account_json \
-            .return_value.get_bucket.call_args_list[0]
+
+        bucket_options, _ = gcloud_mocked.return_value.get_bucket.call_args_list[0]
+
+        assert settings["storage.gcloud.bucket_name"] in bucket_options
+
+def test_from_settings_with_credentials():
+    from pyramid_storage import gcloud
+
+    settings = {
+        "storage.gcloud.credentials": "credentials.json",
+        'storage.gcloud.bucket_name': 'Attachments',
+    }
+
+    inst = gcloud.GoogleCloudStorage.from_settings(settings, 'storage.')
+
+    assert inst.base_url == ''
+    assert inst.bucket_name == settings["storage.gcloud.bucket_name"]
+    assert inst.acl == 'publicRead'
+    assert set(('jpg', 'txt', 'doc')).intersection(inst.extensions)
+
+    with mock.patch.object(gcloud, "Client") as gcloud_mocked:
+        inst.get_connection()
+
+        _, gcloud_options = gcloud_mocked.from_service_account_json.call_args_list[0]
+
+        assert "json_credentials_path" in gcloud_options
+        assert gcloud_options["json_credentials_path"] == settings["storage.gcloud.credentials"]
+
+        inst.get_bucket()
+
+        bucket_options, _ = gcloud_mocked.from_service_account_json.return_value.get_bucket.call_args_list[0]
+
         assert "Attachments" in bucket_options
 
 

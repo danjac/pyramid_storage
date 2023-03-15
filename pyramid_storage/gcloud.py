@@ -40,7 +40,8 @@ class GoogleCloudStorage(object):
     @classmethod
     def from_settings(cls, settings, prefix):
         options = (
-            ('gcloud.credentials', True, None),
+            ('gcloud.credentials', False, None),
+            ('gcloud.project', False, None),
             ('gcloud.bucket_name', True, None),
             ('gcloud.acl', False, DEFAULT_FILE_ACL),
             ('base_url', False, ''),
@@ -54,10 +55,11 @@ class GoogleCloudStorage(object):
         kwargs = dict([(k.replace('gcloud.', ''), v) for k, v in kwargs.items()])
         return cls(**kwargs)
 
-    def __init__(self, credentials, bucket_name, acl=None, base_url='',
+    def __init__(self, credentials, bucket_name, project=None, acl=None, base_url='',
                  extensions='default', auto_create_bucket=False,
                  auto_create_acl=DEFAULT_BUCKET_ACL, cache_control=None):
         self.credentials = credentials
+        self.project = project
         self.bucket_name = bucket_name
         self.acl = acl
         self.base_url = base_url
@@ -71,7 +73,19 @@ class GoogleCloudStorage(object):
 
     def get_connection(self):
         if self._client is None:
-            self._client = Client.from_service_account_json(json_credentials_path=self.credentials)
+            if self.credentials:
+                self._client = Client.from_service_account_json(
+                    json_credentials_path=self.credentials
+                )
+
+            else:
+                # empty credentials, try ADC
+                if self.project:
+                    self._client = Client(project=self.project)
+
+                else:
+                    self._client = Client()
+
         return self._client
 
     def get_bucket(self, bucket_name=None):
