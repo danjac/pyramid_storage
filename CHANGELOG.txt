@@ -1,5 +1,9 @@
-1.1.1 (unreleased)
+1.2.0 (2023-03-21)
 ==================
+
+**New Features**
+
+- Add support for Application Default Credentials in Google Cloud backend (#47)
 
 **Internal changes**
 
