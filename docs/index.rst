@@ -1,7 +1,7 @@
 pyramid_storage
 ===============
 
-**pyramid_storage** is a simple file upload manager for the `Pyramid`_ framework. It currently supports uploads to the local file system and to the Amazon S3 cloud storage service.
+**pyramid_storage** is a simple file upload manager for the `Pyramid`_ framework. It currently supports uploads to the local file system, S3 and GCS.
 
 
 Installation
@@ -41,6 +41,23 @@ To use S3 file storage instead of storing files locally on your server (the defa
 alternatively::
 
     config.include('pyramid_storage.s3')
+
+To use GCS file storage instead of storing files locally on your server (the default assumption)::
+
+    pyramid.includes =
+        pyramid_storage.gcloud
+
+alternatively::
+
+    config.include('pyramid_storage.gcloud')
+
+We're supporting these authentication methods for GCS:
+
+* JSON credentials file (requires a credentials file to be deployed to the env you're running in, as well as the ``credentials`` argument pointing at the path.).
+* Application Default Credentials `ADC`_ (this makes the ``credentials`` argument unnecessary, but may require the ``project`` arg, e.g. when not running in GKE).
+
+You'll need to choose a method here, when using a JSON Credentials file, there's no need to configure the ``project`` argument, when using ADC, you don't need
+the ``credentials`` argument (but you might need the ``project`` argument, depending on the environment your running in).
 
 
 Configuration
@@ -86,7 +103,8 @@ Setting                Default                Description
 ======================    =================      ==================================================================
 Setting                   Default                Description
 ======================    =================      ==================================================================
-**gcloud.credentials**    **required**           Path to the Service Accounts credentials JSON file.
+**gcloud.credentials**                           Path to the Service Accounts credentials JSON file.
+**gcloud.project**                               **required** if running without a credentials file and in an environment where the project can't automatically be determined.
 **gcloud.bucket_name**    **required**           Google Cloud bucket
 **gcloud.acl**            ``publicRead``         `Google Cloud ACL permissions <https://cloud.google.com/storage/docs/access-control/making-data-public>`_
 **base_url**                                     Relative or absolute base URL for uploads; must end in slash ("/")
@@ -346,3 +364,4 @@ API
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _Github: https://github.com/danjac/pyramid_storage
 .. _google-cloud-storage: https://github.com/googleapis/google-cloud-python
+.. _ADC: https://cloud.google.com/docs/authentication/provide-credentials-adc
