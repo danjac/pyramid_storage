@@ -100,17 +100,18 @@ Setting                Default                Description
 
 **Google Cloud file storage**
 
-======================    =================      ==================================================================
-Setting                   Default                Description
-======================    =================      ==================================================================
-**gcloud.credentials**                           Path to the Service Accounts credentials JSON file.
-**gcloud.project**                               **required** if running without a credentials file and in an environment where the project can't automatically be determined.
-**gcloud.bucket_name**    **required**           Google Cloud bucket
-**gcloud.acl**            ``publicRead``         `Google Cloud ACL permissions <https://cloud.google.com/storage/docs/access-control/making-data-public>`_
-**base_url**                                     Relative or absolute base URL for uploads; must end in slash ("/")
-**extensions**            ``default``            List of extensions or extension groups (see below)
-**name**                  ``storage``            Name of property added to request, e.g. **request.storage**
-=====================     =================      ==================================================================
+======================================    =================      ==================================================================
+Setting                                   Default                Description
+======================================    =================      ==================================================================
+**gcloud.credentials**                                           Path to the Service Accounts credentials JSON file.
+**gcloud.project**                                               **required** if running without a credentials file and in an environment where the project can't automatically be determined.
+**gcloud.bucket_name**                    **required**           Google Cloud bucket
+**gcloud.uniform_bucket_level_access**    ``False``              Enable `Uniform bucket-level access <https://cloud.google.com/storage/docs/uniform-bucket-level-access>`_
+**gcloud.acl**                            ``publicRead``         `Google Cloud ACL permissions <https://cloud.google.com/storage/docs/access-control/making-data-public>`_
+**base_url**                                                     Relative or absolute base URL for uploads; must end in slash ("/")
+**extensions**                            ``default``            List of extensions or extension groups (see below)
+**name**                                  ``storage``            Name of property added to request, e.g. **request.storage**
+======================================    =================      ==================================================================
 
 
 **Configuring extensions:** extensions are given as a list of space-separated extensions or groups of extensions. These groups provide a convenient

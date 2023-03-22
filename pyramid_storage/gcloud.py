@@ -50,6 +50,7 @@ class GoogleCloudStorage(object):
             ('gcloud.auto_create_bucket', False, False),
             ('gcloud.auto_create_acl', False, DEFAULT_BUCKET_ACL),
             ('gcloud.cache_control', False, None),
+            ('gcloud.uniform_bucket_level_access', False, False),
         )
         kwargs = utils.read_settings(settings, options, prefix)
         kwargs = dict([(k.replace('gcloud.', ''), v) for k, v in kwargs.items()])
@@ -57,7 +58,8 @@ class GoogleCloudStorage(object):
 
     def __init__(self, credentials, bucket_name, project=None, acl=None, base_url='',
                  extensions='default', auto_create_bucket=False,
-                 auto_create_acl=DEFAULT_BUCKET_ACL, cache_control=None):
+                 auto_create_acl=DEFAULT_BUCKET_ACL, cache_control=None,
+                 uniform_bucket_level_access=False):
         self.credentials = credentials
         self.project = project
         self.bucket_name = bucket_name
@@ -67,6 +69,7 @@ class GoogleCloudStorage(object):
         self.auto_create_bucket = auto_create_bucket
         self.auto_create_acl = auto_create_acl
         self.cache_control = cache_control
+        self.uniform_bucket_level_access = uniform_bucket_level_access
 
         self._client = None
         self._bucket = None
@@ -104,7 +107,10 @@ class GoogleCloudStorage(object):
         except NotFound:
             if self.auto_create_bucket:
                 bucket = self.get_connection().create_bucket(name)
-                bucket.acl.save_predefined(self.auto_create_acl)
+
+                if not self.uniform_bucket_level_access:
+                    bucket.acl.save_predefined(self.auto_create_acl)
+
                 return bucket
             raise RuntimeError("Bucket %s does not exist. Buckets "
                                "can be automatically created by "
@@ -241,6 +247,15 @@ class GoogleCloudStorage(object):
 
         blob.cache_control = self.cache_control
         file.seek(0)
-        acl = acl or self.acl
-        blob.upload_from_file(file, rewind=True, content_type=content_type, predefined_acl=acl)
+
+        kwargs = {
+            "rewind": True,
+            "content_type": content_type or "application/octet-stream",
+        }
+
+        if not self.uniform_bucket_level_access:
+            kwargs["predefined_acl"] = acl or self.acl
+
+        blob.upload_from_file(file, **kwargs)
+
         return filename
