@@ -1,7 +1,9 @@
-1.2.1 (unreleased)
+1.3.0 (2023-03-22)
 ==================
 
-- Nothing changed yet.
+**New Features**
+
+- Google Cloud backend: add setting to enable Uniform bucket-level access (#49)
 
 
 1.2.0 (2023-03-21)
