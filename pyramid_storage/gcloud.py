@@ -4,6 +4,8 @@ import os
 import mimetypes
 import urllib
 
+from pyramid.exceptions import ConfigurationError
+from pyramid.settings import asbool
 from zope.interface import implementer
 
 from . import utils
@@ -43,13 +45,14 @@ class GoogleCloudStorage(object):
             ('gcloud.credentials', False, None),
             ('gcloud.project', False, None),
             ('gcloud.bucket_name', True, None),
-            ('gcloud.acl', False, DEFAULT_FILE_ACL),
+            ('gcloud.acl', False, None),
             ('base_url', False, ''),
             ('extensions', False, 'default'),
             # Gcloud Connection options.
             ('gcloud.auto_create_bucket', False, False),
-            ('gcloud.auto_create_acl', False, DEFAULT_BUCKET_ACL),
+            ('gcloud.auto_create_acl', False, None),
             ('gcloud.cache_control', False, None),
+            ('gcloud.uniform_bucket_level_access', False, False),
         )
         kwargs = utils.read_settings(settings, options, prefix)
         kwargs = dict([(k.replace('gcloud.', ''), v) for k, v in kwargs.items()])
@@ -57,16 +60,32 @@ class GoogleCloudStorage(object):
 
     def __init__(self, credentials, bucket_name, project=None, acl=None, base_url='',
                  extensions='default', auto_create_bucket=False,
-                 auto_create_acl=DEFAULT_BUCKET_ACL, cache_control=None):
+                 auto_create_acl=None, cache_control=None,
+                 uniform_bucket_level_access=False):
+        if (acl or auto_create_acl) and uniform_bucket_level_access:
+            raise ConfigurationError(
+                '"acl" and "auto_create_acl" \
+                        should remain unset \
+                        when "uniform_bucket_level_access" \
+                        is enabled!'
+            )
+
+        if not uniform_bucket_level_access:
+            self.acl = acl or DEFAULT_FILE_ACL
+            self.auto_create_acl = auto_create_acl or DEFAULT_BUCKET_ACL
+
+        else:
+            self.acl = acl
+            self.auto_create_acl = auto_create_acl
+
         self.credentials = credentials
         self.project = project
         self.bucket_name = bucket_name
-        self.acl = acl
         self.base_url = base_url
         self.extensions = resolve_extensions(extensions)
         self.auto_create_bucket = auto_create_bucket
-        self.auto_create_acl = auto_create_acl
         self.cache_control = cache_control
+        self.uniform_bucket_level_access = asbool(uniform_bucket_level_access)
 
         self._client = None
         self._bucket = None
@@ -104,7 +123,10 @@ class GoogleCloudStorage(object):
         except NotFound:
             if self.auto_create_bucket:
                 bucket = self.get_connection().create_bucket(name)
-                bucket.acl.save_predefined(self.auto_create_acl)
+
+                if not self.uniform_bucket_level_access:
+                    bucket.acl.save_predefined(self.auto_create_acl)
+
                 return bucket
             raise RuntimeError("Bucket %s does not exist. Buckets "
                                "can be automatically created by "
@@ -241,6 +263,15 @@ class GoogleCloudStorage(object):
 
         blob.cache_control = self.cache_control
         file.seek(0)
-        acl = acl or self.acl
-        blob.upload_from_file(file, rewind=True, content_type=content_type, predefined_acl=acl)
+
+        kwargs = {
+            "rewind": True,
+            "content_type": content_type or "application/octet-stream",
+        }
+
+        if not self.uniform_bucket_level_access:
+            kwargs["predefined_acl"] = acl or self.acl
+
+        blob.upload_from_file(file, **kwargs)
+
         return filename

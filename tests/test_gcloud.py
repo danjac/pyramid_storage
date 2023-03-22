@@ -146,7 +146,38 @@ def test_save_file():
         with mock.patch('pyramid_storage.gcloud.Blob') as mocked_new_blob:
             name = g.save_file(BytesIO(), "test.jpg")
             assert mocked_new_blob.return_value.upload_from_file.called
+
     assert name == "test.jpg"
+
+
+def test_save_file_with_uniform_bucket_level_access_disabled():
+    from pyramid_storage import gcloud
+
+    g = gcloud.GoogleCloudStorage(
+        None, "Attachments"
+    )
+
+    with mock.patch("pyramid_storage.gcloud.GoogleCloudStorage.get_connection", _get_mock_gcloud_connection):
+        with mock.patch("pyramid_storage.gcloud.Blob") as mocked_blob:
+            filename = g.save_file(mock.Mock(), "acme.txt")
+
+            assert mocked_blob.return_value.upload_from_file.called
+            assert "predefined_acl" in mocked_blob.return_value.upload_from_file.call_args_list[0].kwargs
+
+
+def test_save_file_with_uniform_bucket_level_access_enabled():
+    from pyramid_storage import gcloud
+
+    g = gcloud.GoogleCloudStorage(
+        None, "Attachments", uniform_bucket_level_access=True
+    )
+
+    with mock.patch("pyramid_storage.gcloud.GoogleCloudStorage.get_connection", _get_mock_gcloud_connection):
+        with mock.patch("pyramid_storage.gcloud.Blob") as mocked_blob:
+            filename = g.save_file(mock.Mock(), "acme.txt")
+
+            assert mocked_blob.return_value.upload_from_file.called
+            assert "predefined_acl" not in mocked_blob.return_value.upload_from_file.call_args_list[0].kwargs
 
 
 def test_save_filename():
@@ -261,6 +292,65 @@ def test_from_settings_with_defaults():
         bucket_options, _ = gcloud_mocked.return_value.get_bucket.call_args_list[0]
 
         assert settings["storage.gcloud.bucket_name"] in bucket_options
+
+
+def test_from_settings_with_defaults_and_uniform_bucket_level_access_enabled():
+    from pyramid_storage import gcloud
+
+    settings = {
+        "storage.gcloud.bucket_name": "Attachments",
+        "storage.gcloud.uniform_bucket_level_access": True
+    }
+
+    inst = gcloud.GoogleCloudStorage.from_settings(settings, "storage.")
+
+    assert inst.bucket_name == settings["storage.gcloud.bucket_name"]
+    assert inst.uniform_bucket_level_access == settings["storage.gcloud.uniform_bucket_level_access"]
+    assert inst.acl == None
+    assert inst.auto_create_acl == None
+
+
+def test_from_settings_with_defaults_and_uniform_bucket_level_access_enabled_as_string():
+    from pyramid_storage import gcloud
+
+    settings = {
+        "storage.gcloud.bucket_name": "Attachments",
+        "storage.gcloud.uniform_bucket_level_access": "true"
+    }
+
+    inst = gcloud.GoogleCloudStorage.from_settings(settings, "storage.")
+
+    assert inst.bucket_name == settings["storage.gcloud.bucket_name"]
+    assert inst.uniform_bucket_level_access
+    assert inst.acl == None
+    assert inst.auto_create_acl == None
+
+
+def test_from_settings_with_defaults_and_uniform_bucket_level_access_enabled_and_acl_set():
+    from pyramid_storage import gcloud
+
+    settings = {
+        "storage.gcloud.bucket_name": "Attachments",
+        "storage.gcloud.uniform_bucket_level_access": True,
+        "storage.gcloud.acl": "publicRead"
+    }
+
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
+        inst = gcloud.GoogleCloudStorage.from_settings(settings, "storage.") == ConfigurationError
+
+
+def test_from_settings_with_defaults_and_uniform_bucket_level_access_enabled_and_auto_create_acl_set():
+    from pyramid_storage import gcloud
+
+    settings = {
+        "storage.gcloud.bucket_name": "Attachments",
+        "storage.gcloud.uniform_bucket_level_access": True,
+        "storage.gcloud.auto_create_acl": "projectPrivate"
+    }
+
+    with pytest.raises(pyramid_exceptions.ConfigurationError):
+        inst = gcloud.GoogleCloudStorage.from_settings(settings, "storage.") == ConfigurationError
+
 
 def test_from_settings_with_credentials():
     from pyramid_storage import gcloud
