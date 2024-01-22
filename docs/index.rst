@@ -7,7 +7,7 @@ pyramid_storage
 Installation
 -------------
 
-Install with **pip install pyramid_storage**. To install from source, unzip/tar, cd and **python setup.py install**.
+Install with **pip install pyramid_storage**. To install from source, unzip/tar, cd and **python -m pip install .**.
 
 Bugs and issues
 ---------------

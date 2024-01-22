@@ -33,9 +33,7 @@ test: install
 	$(VENV)/bin/py.test
 
 docs: install
-	pushd docs/
-	make html
-	popd
+	cd docs/ && make html SPHINXBUILD=$(VENV)/bin/sphinx-build
 
 clean:
 	find pyramid_storage/ -name '*.pyc' -delete
