@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import mock
-import pytest
+from unittest import mock
 
+import pytest
 from pyramid import exceptions as pyramid_exceptions
 
 

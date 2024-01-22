@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
-import mock
+from unittest import mock
+
 import pytest
 
 from pyramid import exceptions as pyramid_exceptions

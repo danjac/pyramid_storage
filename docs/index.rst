@@ -312,7 +312,7 @@ It's easier to run unit tests on your upload views without actually handling rea
 
 This class stores the names of the files internally for your assertions in the **saved** attribute::
 
-    import mock
+    from unittest import mock
 
     from pyramid.testing import DummyRequest
     from pyramid_storage.storage import DummyFileStorage
