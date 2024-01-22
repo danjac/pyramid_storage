@@ -37,7 +37,7 @@ jobs:
       - name: Run unit tests
         run: make test
 
-  lint:
+  docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
