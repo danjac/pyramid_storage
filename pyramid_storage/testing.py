@@ -13,7 +13,7 @@ class DummyFileStorage(object):
     def save(self, fs, folder=None, *args, **kwargs):
         """Performs a fake saved operation"""
         filename = fs.filename
-        name = os.path.join(folder or '', filename)
+        name = os.path.join(folder or "", filename)
         self.saved.append(name)
         return name
 

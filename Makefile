@@ -18,12 +18,12 @@ $(INSTALL_STAMP): $(VENV)/bin/python pyproject.toml requirements.txt
 	touch $(INSTALL_STAMP)
 
 lint: install
-	$(VENV)/bin/ruff check src tests *.py
-	$(VENV)/bin/ruff format --check src tests *.py
+	$(VENV)/bin/ruff check pyramid_storage tests
+	$(VENV)/bin/ruff format --check pyramid_storage tests
 
 format: install
-	$(VENV)/bin/ruff check --fix src tests *.py
-	$(VENV)/bin/ruff format src tests *.py
+	$(VENV)/bin/ruff check --fix pyramid_storage tests
+	$(VENV)/bin/ruff format pyramid_storage tests
 
 requirements.txt: requirements.in
 	pip-compile requirements.in
@@ -38,6 +38,6 @@ docs: install
 	popd
 
 clean:
-	find src/ -name '*.pyc' -delete
-	find src/ -name '__pycache__' -type d -exec rm -fr {} \;
+	find pyramid_storage/ -name '*.pyc' -delete
+	find pyramid_storage/ -name '__pycache__' -type d -exec rm -fr {} \;
 	rm -rf $(VENV) mail/ *.egg-info .pytest_cache .ruff_cache .coverage build dist

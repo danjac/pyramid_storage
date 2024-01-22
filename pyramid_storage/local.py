@@ -7,17 +7,14 @@ import urllib
 from zope.interface import implementer
 
 from . import utils
-from .extensions import resolve_extensions
 from .exceptions import FileNotAllowed
+from .extensions import resolve_extensions
 from .interfaces import IFileStorage
 from .registry import register_file_storage_impl
 
 
 def includeme(config):
-
-    impl = LocalFileStorage.from_settings(
-        config.registry.settings, prefix='storage.'
-    )
+    impl = LocalFileStorage.from_settings(config.registry.settings, prefix="storage.")
 
     register_file_storage_impl(config, impl)
 
@@ -41,14 +38,14 @@ class LocalFileStorage(object):
         :param prefix: prefix separating these settings
         """
         options = (
-            ('base_path', True, None),
-            ('base_url', False, ''),
-            ('extensions', False, 'default'),
+            ("base_path", True, None),
+            ("base_url", False, ""),
+            ("extensions", False, "default"),
         )
         kwargs = utils.read_settings(settings, options, prefix)
         return cls(**kwargs)
 
-    def __init__(self, base_path, base_url='', extensions='default'):
+    def __init__(self, base_path, base_url="", extensions="default"):
         self.base_path = base_path
         self.base_url = base_url
         self.extensions = resolve_extensions(extensions)
@@ -118,7 +115,7 @@ class LocalFileStorage(object):
         extensions = extensions or self.extensions
         if not extensions:
             return True
-        if ext.startswith('.'):
+        if ext.startswith("."):
             ext = ext[1:]
         return ext.lower() in extensions
 
@@ -155,8 +152,7 @@ class LocalFileStorage(object):
 
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
-    def save_file(self, file, filename, folder=None, randomize=False,
-                  extensions=None, **kwargs):
+    def save_file(self, file, filename, folder=None, randomize=False, extensions=None, **kwargs):
         """Saves a file object to the uploads location.
         Returns the resolved filename, i.e. the folder +
         the (randomized/incremented) base name.
@@ -176,9 +172,7 @@ class LocalFileStorage(object):
         if not self.filename_allowed(filename, extensions):
             raise FileNotAllowed()
 
-        filename = utils.secure_filename(
-            os.path.basename(filename)
-        )
+        filename = utils.secure_filename(os.path.basename(filename))
 
         if folder:
             dest_folder = os.path.join(self.base_path, folder)
@@ -219,4 +213,4 @@ class LocalFileStorage(object):
             if not os.path.exists(path):
                 return name, path
             counter += 1
-            name = '%s-%d%s' % (basename, counter, ext)
+            name = "%s-%d%s" % (basename, counter, ext)

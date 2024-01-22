@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
 import mimetypes
+import os
 import urllib
 
 from pyramid.settings import asbool
@@ -15,43 +15,38 @@ from .registry import register_file_storage_impl
 
 
 def includeme(config):
-
-    impl = S3FileStorage.from_settings(
-        config.registry.settings, prefix='storage.'
-    )
+    impl = S3FileStorage.from_settings(config.registry.settings, prefix="storage.")
 
     register_file_storage_impl(config, impl)
 
 
 @implementer(IFileStorage)
 class S3FileStorage(object):
-
     @classmethod
     def from_settings(cls, settings, prefix):
         options = (
-            ('aws.bucket_name', True, None),
-            ('aws.acl', False, 'public-read'),
-            ('base_url', False, ''),
-            ('extensions', False, 'default'),
+            ("aws.bucket_name", True, None),
+            ("aws.acl", False, "public-read"),
+            ("base_url", False, ""),
+            ("extensions", False, "default"),
             # S3 Connection options.
-            ('aws.access_key', False, None),
-            ('aws.secret_key', False, None),
-            ('aws.use_path_style', False, False),
-            ('aws.is_secure', False, True),
-            ('aws.host', False, None),
-            ('aws.port', False, None),
-            ('aws.region', False, None),
-            ('aws.num_retries', False, 1),
-            ('aws.timeout', False, 5),
+            ("aws.access_key", False, None),
+            ("aws.secret_key", False, None),
+            ("aws.use_path_style", False, False),
+            ("aws.is_secure", False, True),
+            ("aws.host", False, None),
+            ("aws.port", False, None),
+            ("aws.region", False, None),
+            ("aws.num_retries", False, 1),
+            ("aws.timeout", False, 5),
         )
         kwargs = utils.read_settings(settings, options, prefix)
-        kwargs = dict([(k.replace('aws.', ''), v) for k, v in kwargs.items()])
-        kwargs['aws_access_key_id'] = kwargs.pop('access_key')
-        kwargs['aws_secret_access_key'] = kwargs.pop('secret_key')
+        kwargs = dict([(k.replace("aws.", ""), v) for k, v in kwargs.items()])
+        kwargs["aws_access_key_id"] = kwargs.pop("access_key")
+        kwargs["aws_secret_access_key"] = kwargs.pop("secret_key")
         return cls(**kwargs)
 
-    def __init__(self, bucket_name, acl=None, base_url='',
-                 extensions='default', **conn_options):
+    def __init__(self, bucket_name, acl=None, base_url="", extensions="default", **conn_options):
         self.bucket_name = bucket_name
         self.acl = acl
         self.base_url = base_url
@@ -64,36 +59,36 @@ class S3FileStorage(object):
         except ImportError:
             raise RuntimeError("You must have boto installed to use s3")
 
-        from boto.s3.connection import OrdinaryCallingFormat
         from boto.s3 import connect_to_region
+        from boto.s3.connection import OrdinaryCallingFormat
 
         options = self.conn_options.copy()
-        options['is_secure'] = asbool(options['is_secure'])
+        options["is_secure"] = asbool(options["is_secure"])
 
-        if options['port']:
-            options['port'] = int(options['port'])
+        if options["port"]:
+            options["port"] = int(options["port"])
         else:
-            del options['port']
+            del options["port"]
 
-        if not options['host']:
-            del options['host']
+        if not options["host"]:
+            del options["host"]
 
-        if asbool(options.pop('use_path_style')):
-            options['calling_format'] = OrdinaryCallingFormat()
+        if asbool(options.pop("use_path_style")):
+            options["calling_format"] = OrdinaryCallingFormat()
 
-        num_retries = int(options.pop('num_retries'))
-        timeout = float(options.pop('timeout'))
+        num_retries = int(options.pop("num_retries"))
+        timeout = float(options.pop("timeout"))
 
-        region = options.pop('region')
+        region = options.pop("region")
         if region:
-            del options['host']
-            del options['port']
+            del options["host"]
+            del options["port"]
             conn = connect_to_region(region, **options)
         else:
             conn = boto.connect_s3(**options)
 
         conn.num_retries = num_retries
-        conn.http_connection_kwargs['timeout'] = timeout
+        conn.http_connection_kwargs["timeout"] = timeout
         return conn
 
     def get_bucket(self, bucket_name=None):
@@ -146,7 +141,7 @@ class S3FileStorage(object):
         extensions = extensions or self.extensions
         if not extensions:
             return True
-        if ext.startswith('.'):
+        if ext.startswith("."):
             ext = ext[1:]
         return ext.lower() in extensions
 
@@ -186,8 +181,18 @@ class S3FileStorage(object):
 
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
-    def save_file(self, file, filename, folder=None, bucket_name=None, randomize=False,
-                  extensions=None, acl=None, replace=False, headers=None):
+    def save_file(
+        self,
+        file,
+        filename,
+        folder=None,
+        bucket_name=None,
+        randomize=False,
+        extensions=None,
+        acl=None,
+        replace=False,
+        headers=None,
+    ):
         """
         :param filename: local filename
         :param folder: relative path of sub-folder
@@ -206,9 +211,7 @@ class S3FileStorage(object):
         if not self.filename_allowed(filename, extensions):
             raise FileNotAllowed()
 
-        filename = utils.secure_filename(
-            os.path.basename(filename)
-        )
+        filename = utils.secure_filename(os.path.basename(filename))
 
         if randomize:
             filename = utils.random_filename(filename)
@@ -216,11 +219,11 @@ class S3FileStorage(object):
         if folder:
             filename = folder + "/" + filename
 
-        content_type = headers.get('Content-Type')
+        content_type = headers.get("Content-Type")
         if content_type is None:
             content_type, _ = mimetypes.guess_type(filename)
-            content_type = content_type or 'application/octet-stream'
-            headers['Content-Type'] = content_type
+            content_type = content_type or "application/octet-stream"
+            headers["Content-Type"] = content_type
 
         bucket = self.get_bucket(bucket_name)
 
@@ -228,10 +231,6 @@ class S3FileStorage(object):
 
         file.seek(0)
 
-        key.set_contents_from_file(file,
-                                   headers=headers,
-                                   policy=acl,
-                                   replace=replace,
-                                   rewind=True)
+        key.set_contents_from_file(file, headers=headers, policy=acl, replace=replace, rewind=True)
 
         return filename

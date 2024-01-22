@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pyramid.testing import DummyRequest, testConfig
 from zope.interface import implementer
-from pyramid.testing import testConfig, DummyRequest
 
 
 class DummyRegistry(object):
@@ -28,7 +28,7 @@ def test_get_file_storage():
         pass
 
     settings = {
-        'storage.base_path': 'uploads',
+        "storage.base_path": "uploads",
     }
 
     with testConfig(settings=settings) as config:
