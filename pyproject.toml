@@ -1,0 +1,85 @@
+[project]
+dynamic = ["version", "dependencies"]
+name = "pyramid_storage"
+description = "File storage package for Pyramid"
+readme = "README.rst"
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "License :: OSI Approved :: BSD License",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: Pypi",
+    "Framework :: Pyramid",
+    "Operating System :: OS Independent",
+]
+keywords = ["web services"]
+authors = [
+  {name = "Dan Jacob", email = "danjac354@gmail.com"},
+]
+
+[project.urls]
+Repository = "https://github.com/danjac/pyramid_storage/"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.in"] }
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools_scm
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+]
+docs = [
+    "Sphinx",
+    "docutils",
+    "repoze.sphinx.autointerface",
+]
+s3 = [
+    "boto",
+]
+gcloud = [
+    "google-cloud-storage",
+]
+
+[tool.pip-tools]
+generate-hashes = true
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+]
+relative_files = true
+
+[tool.ruff]
+line-length = 99
+extend-exclude = [
+    "__pycache__",
+    ".venv/",
+]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E", "W",
+    # flake8
+    "F",
+    # isort
+    "I",
+]
+ignore = [
+    # `format` will wrap lines.
+    "E501",
+]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2

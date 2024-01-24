@@ -20,3 +20,4 @@ docs/output
 docs/build
 docs/_build
 *\$py.class
+.venv

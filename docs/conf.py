@@ -43,14 +43,6 @@ book = os.environ.get('BOOK')
 # absolute, like shown here.
 parent = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(os.path.abspath(parent))
-wd = os.getcwd()
-os.chdir(parent)
-os.system('%s setup.py test -q' % sys.executable)
-os.chdir(wd)
-
-for item in os.listdir(parent):
-    if item.endswith('.egg'):
-        sys.path.append(os.path.join(parent, item))
 
 # General configuration
 # ---------------------
@@ -418,9 +410,9 @@ def app_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
 def setup(app):
     app.add_role('app', app_role)
-    app.add_directive('frontmatter', frontmatter, 1, (0, 0, 0))
-    app.add_directive('mainmatter', mainmatter, 1, (0, 0, 0))
-    app.add_directive('backmatter', backmatter, 1, (0, 0, 0))
+    app.add_directive('frontmatter', frontmatter)
+    app.add_directive('mainmatter', mainmatter)
+    app.add_directive('backmatter', backmatter)
     app.connect('autodoc-process-signature', resig)
 
 def resig(app, what, name, obj, options, signature, return_annotation):

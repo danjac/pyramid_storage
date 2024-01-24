@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
 import mimetypes
+import os
 import urllib
 
 from pyramid.exceptions import ConfigurationError
@@ -14,54 +14,62 @@ from .extensions import resolve_extensions
 from .interfaces import IFileStorage
 from .registry import register_file_storage_impl
 
+
 try:
-    from google.cloud.storage.client import Client
-    from google.cloud.storage.blob import Blob
     from google.cloud.exceptions import NotFound
+    from google.cloud.storage.blob import Blob
+    from google.cloud.storage.client import Client
 except ImportError:
-    raise RuntimeError("Could not load Google Cloud Storage bindings.\n"
-                       "See https://github.com/GoogleCloudPlatform/gcloud-python")
+    raise RuntimeError(
+        "Could not load Google Cloud Storage bindings.\n"
+        "See https://github.com/GoogleCloudPlatform/gcloud-python"
+    )
 
 
 def includeme(config):
-
-    impl = GoogleCloudStorage.from_settings(
-        config.registry.settings, prefix='storage.'
-    )
+    impl = GoogleCloudStorage.from_settings(config.registry.settings, prefix="storage.")
 
     register_file_storage_impl(config, impl)
 
 
 DEFAULT_BUCKET_ACL = "projectPrivate"
-DEFAULT_FILE_ACL = 'publicRead'
+DEFAULT_FILE_ACL = "publicRead"
 
 
 @implementer(IFileStorage)
 class GoogleCloudStorage(object):
-
     @classmethod
     def from_settings(cls, settings, prefix):
         options = (
-            ('gcloud.credentials', False, None),
-            ('gcloud.project', False, None),
-            ('gcloud.bucket_name', True, None),
-            ('gcloud.acl', False, None),
-            ('base_url', False, ''),
-            ('extensions', False, 'default'),
+            ("gcloud.credentials", False, None),
+            ("gcloud.project", False, None),
+            ("gcloud.bucket_name", True, None),
+            ("gcloud.acl", False, None),
+            ("base_url", False, ""),
+            ("extensions", False, "default"),
             # Gcloud Connection options.
-            ('gcloud.auto_create_bucket', False, False),
-            ('gcloud.auto_create_acl', False, None),
-            ('gcloud.cache_control', False, None),
-            ('gcloud.uniform_bucket_level_access', False, False),
+            ("gcloud.auto_create_bucket", False, False),
+            ("gcloud.auto_create_acl", False, None),
+            ("gcloud.cache_control", False, None),
+            ("gcloud.uniform_bucket_level_access", False, False),
         )
         kwargs = utils.read_settings(settings, options, prefix)
-        kwargs = dict([(k.replace('gcloud.', ''), v) for k, v in kwargs.items()])
+        kwargs = dict([(k.replace("gcloud.", ""), v) for k, v in kwargs.items()])
         return cls(**kwargs)
 
-    def __init__(self, credentials, bucket_name, project=None, acl=None, base_url='',
-                 extensions='default', auto_create_bucket=False,
-                 auto_create_acl=None, cache_control=None,
-                 uniform_bucket_level_access=False):
+    def __init__(
+        self,
+        credentials,
+        bucket_name,
+        project=None,
+        acl=None,
+        base_url="",
+        extensions="default",
+        auto_create_bucket=False,
+        auto_create_acl=None,
+        cache_control=None,
+        uniform_bucket_level_access=False,
+    ):
         if (acl or auto_create_acl) and uniform_bucket_level_access:
             raise ConfigurationError(
                 '"acl" and "auto_create_acl" \
@@ -128,10 +136,12 @@ class GoogleCloudStorage(object):
                     bucket.acl.save_predefined(self.auto_create_acl)
 
                 return bucket
-            raise RuntimeError("Bucket %s does not exist. Buckets "
-                               "can be automatically created by "
-                               "setting GS_AUTO_CREATE_BUCKET to "
-                               "``True``." % name)
+            raise RuntimeError(
+                "Bucket %s does not exist. Buckets "
+                "can be automatically created by "
+                "setting GS_AUTO_CREATE_BUCKET to "
+                "``True``." % name
+            )
 
     def url(self, filename):
         """Returns entire URL of the filename, joined to the base_url
@@ -187,7 +197,7 @@ class GoogleCloudStorage(object):
         extensions = extensions or self.extensions
         if not extensions:
             return True
-        if ext.startswith('.'):
+        if ext.startswith("."):
             ext = ext[1:]
         return ext.lower() in extensions
 
@@ -222,8 +232,18 @@ class GoogleCloudStorage(object):
         """
         return self.save_file(open(filename, "rb"), filename, *args, **kwargs)
 
-    def save_file(self, file, filename, folder=None, bucket_name=None, randomize=False,
-                  extensions=None, acl=None, replace=False, headers=None):
+    def save_file(
+        self,
+        file,
+        filename,
+        folder=None,
+        bucket_name=None,
+        randomize=False,
+        extensions=None,
+        acl=None,
+        replace=False,
+        headers=None,
+    ):
         """
         :param filename: local filename
         :param folder: relative path of sub-folder
@@ -238,9 +258,7 @@ class GoogleCloudStorage(object):
         if not self.filename_allowed(filename, extensions):
             raise FileNotAllowed()
 
-        filename = utils.secure_filename(
-            os.path.basename(filename)
-        )
+        filename = utils.secure_filename(os.path.basename(filename))
 
         if randomize:
             filename = utils.random_filename(filename)
@@ -249,7 +267,7 @@ class GoogleCloudStorage(object):
             filename = folder + "/" + filename
 
         content_type, _ = mimetypes.guess_type(filename)
-        content_type = content_type or 'application/octet-stream'
+        content_type = content_type or "application/octet-stream"
 
         blob = self.get_bucket(bucket_name).get_blob(filename)
 

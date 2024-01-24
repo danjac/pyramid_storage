@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-import mock
-import pytest
+from unittest import mock
 
+import pytest
 from pyramid import exceptions as pyramid_exceptions
 
 
-def _mock_open(name='test', mode='wb'):
-
+def _mock_open(name="test", mode="wb"):
     obj = mock.Mock()
     obj.__enter__ = mock.Mock()
     obj.__enter__.return_value = mock.Mock()
@@ -18,22 +17,25 @@ def _mock_open(name='test', mode='wb'):
 
 def test_extension_allowed_if_any():
     from pyramid_storage import local
-    assert local.LocalFileStorage(
-        "", extensions='any').extension_allowed(".jpg")
+
+    assert local.LocalFileStorage("", extensions="any").extension_allowed(".jpg")
 
 
 def test_extension_allowed_if_allowed_if_dotted():
     from pyramid_storage import local
+
     assert local.LocalFileStorage("").extension_allowed(".jpg", ("jpg",))
 
 
 def test_extension_not_allowed_if_allowed_if_dotted():
     from pyramid_storage import local
+
     assert not local.LocalFileStorage("").extension_allowed("jpg", ("gif",))
 
 
 def test_extension_not_allowed_if_allowed_if_not_dotted():
     from pyramid_storage import local
+
     assert not local.LocalFileStorage("").extension_allowed("jpg", ("gif",))
 
 
@@ -78,7 +80,7 @@ def test_save_if_file_allowed():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch('builtins.open', _mock_open),
+        mock.patch("builtins.open", _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -100,7 +102,7 @@ def test_save_file():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch('builtins.open', _mock_open),
+        mock.patch("builtins.open", _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -122,7 +124,7 @@ def test_save_filename():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch('builtins.open', _mock_open),
+        mock.patch("builtins.open", _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -147,7 +149,7 @@ def test_save_if_randomize():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch('builtins.open', _mock_open),
+        mock.patch("builtins.open", _mock_open),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -173,7 +175,8 @@ def test_save_in_folder():
     s = local.LocalFileStorage("uploads", extensions="images")
 
     patches = (
-        mock.patch('builtins.open'), _mock_open(),
+        mock.patch("builtins.open"),
+        _mock_open(),
         mock.patch("os.path.exists", lambda p: False),
         mock.patch("os.makedirs", lambda p: True),
         mock.patch("shutil.copyfileobj", lambda x, y: True),
@@ -191,12 +194,14 @@ def test_save_in_folder():
 
 def test_url():
     from pyramid_storage import local
+
     s = local.LocalFileStorage("", "http://localhost/")
     assert s.url("test.jpg") == "http://localhost/test.jpg"
 
 
 def test_path():
     from pyramid_storage import local
+
     s = local.LocalFileStorage("uploads")
     assert s.path("test.jpg") == "uploads" + os.path.sep + "test.jpg"
 
@@ -205,8 +210,8 @@ def test_remove_if_exists():
     from pyramid_storage import local
 
     patches = (
-        mock.patch('os.remove', mock.Mock()),
-        mock.patch('os.path.exists', lambda p: True),
+        mock.patch("os.remove", mock.Mock()),
+        mock.patch("os.path.exists", lambda p: True),
     )
 
     for patch in patches:
@@ -221,12 +226,13 @@ def test_remove_if_not_exists():
 
     s = local.LocalFileStorage("")
 
-    with mock.patch('os.path.exists', lambda p: False):
+    with mock.patch("os.path.exists", lambda p: False):
         assert not s.delete("test.jpg")
 
 
 def test_resolve_name_if_not_exists():
     from pyramid_storage import local
+
     s = local.LocalFileStorage("uploads")
 
     with mock.patch("os.path.exists", lambda p: False):
@@ -237,6 +243,7 @@ def test_resolve_name_if_not_exists():
 
 def test_resolve_name_if_exists():
     from pyramid_storage import local
+
     s = local.LocalFileStorage("uploads")
 
     def conditional_exists(path):
@@ -260,19 +267,17 @@ def test_dummy_storage():
 
 
 def test_from_settings_with_defaults():
-
     from pyramid_storage import local
 
-    settings = {'storage.base_path': 'here'}
-    inst = local.LocalFileStorage.from_settings(settings, 'storage.')
-    assert inst.base_path == 'here'
-    assert inst.base_url == ''
-    assert set(('jpg', 'txt', 'doc')).intersection(inst.extensions)
+    settings = {"storage.base_path": "here"}
+    inst = local.LocalFileStorage.from_settings(settings, "storage.")
+    assert inst.base_path == "here"
+    assert inst.base_url == ""
+    assert set(("jpg", "txt", "doc")).intersection(inst.extensions)
 
 
 def test_from_settings_if_base_path_missing():
-
     from pyramid_storage import local
 
     with pytest.raises(pyramid_exceptions.ConfigurationError):
-        local.LocalFileStorage.from_settings({}, 'storage.')
+        local.LocalFileStorage.from_settings({}, "storage.")
