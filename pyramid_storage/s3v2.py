@@ -49,3 +49,14 @@ class S3V2FileStorage(S3FileStorage):
         kwargs['aws_access_key_id'] = kwargs.pop('access_key')
         kwargs['aws_secret_access_key'] = kwargs.pop('secret_key')
         return cls(**kwargs)
+
+def get_connection(self):
+        raise NotImplementedError()
+
+    def get_resource(self):
+
+        try:
+            import boto3
+        except ImportError:
+            raise RuntimeError("You must have boto3 installed to use s3v2")
+        from botocore.client import Config
