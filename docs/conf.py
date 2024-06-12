@@ -442,7 +442,7 @@ def resig(app, what, name, obj, options, signature, return_annotation):
 
 # Bibliographic Dublin Core info.
 epub_title = 'pyramid_storage'
-epub_author = 'Dan Jacob'
+epub_author = 'Dan Jacob, Serge Korchazhkin'
 epub_copyright = '2013'
 
 # The language of the text. It defaults to the language option
