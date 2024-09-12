@@ -21,7 +21,6 @@ def includeme(config):
 
 @implementer(IFileStorage)
 class LocalFileStorage(object):
-
     """Manages storage and retrieval of file uploads to local
     filesystem on server.
 
