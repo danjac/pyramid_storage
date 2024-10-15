@@ -45,7 +45,7 @@ docs = [
     "repoze.sphinx.autointerface",
 ]
 s3 = [
-    "boto",
+    "boto3",
 ]
 gcloud = [
     "google-cloud-storage",

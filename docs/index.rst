@@ -84,7 +84,7 @@ Setting                Default                Description
 **aws.access_key**     **required**           AWS access key
 **aws.secret_key**     **required**           AWS secret key
 **aws.bucket_name**    **required**           AWS bucket
-**aws.acl**            ``public-read``        `AWS ACL permissions <https://github.com/boto/boto/blob/v2.13.2/boto/s3/acl.py#L25-L28>`_
+**aws.acl**            ``public-read``        `AWS ACL permissions <https://boto3.amazonaws.com/v1/documentation/api/latest/guide/migrations3.html#access-controls>`_
 **base_url**                                  Relative or absolute base URL for uploads; must end in slash ("/")
 **extensions**         ``default``            List of extensions or extension groups (see below)
 **name**               ``storage``            Name of property added to request, e.g. **request.storage**
@@ -230,7 +230,7 @@ Usage: s3 file storage
 ----------------------
 
 .. warning::
-    S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto``).
+    S3 support requires you install the `Boto`_ library separately (e.g. ``pip install boto3``).
 
     Alternatively you can install **pyramid_storage** with the mandatory extra dependencies: ``pip install pyramid_storage[s3]``
 
@@ -361,7 +361,7 @@ API
 .. autoclass:: DummyFileStorage
    :members:
 
-.. _Boto: http://pypi.python.org/pypi/boto/
+.. _Boto3: http://pypi.python.org/pypi/boto3/
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _Github: https://github.com/danjac/pyramid_storage
 .. _google-cloud-storage: https://github.com/googleapis/google-cloud-python
