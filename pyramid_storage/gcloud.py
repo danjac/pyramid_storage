@@ -242,7 +242,7 @@ class GoogleCloudStorage(object):
         extensions=None,
         acl=None,
         replace=False,
-        headers=None,
+        headers={},
     ):
         """
         :param filename: local filename
@@ -251,6 +251,7 @@ class GoogleCloudStorage(object):
         :param randomize: randomize the filename
         :param extensions: iterable of allowed extensions, if not default
         :param acl: ACL policy (if None then uses default)
+        :param headers: dict request headers (used to specify for content-type)
         :returns: modified filename
         """
         extensions = extensions or self.extensions
@@ -266,7 +267,9 @@ class GoogleCloudStorage(object):
         if folder:
             filename = folder + "/" + filename
 
-        content_type, _ = mimetypes.guess_type(filename)
+        content_type = headers.get("Content-Type")
+        if content_type is None:
+            content_type, _ = mimetypes.guess_type(filename)
         content_type = content_type or "application/octet-stream"
 
         blob = self.get_bucket(bucket_name).get_blob(filename)
@@ -284,7 +287,7 @@ class GoogleCloudStorage(object):
 
         kwargs = {
             "rewind": True,
-            "content_type": content_type or "application/octet-stream",
+            "content_type": content_type,
         }
 
         if not self.uniform_bucket_level_access:

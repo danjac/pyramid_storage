@@ -216,6 +216,26 @@ def test_save_if_randomize():
     assert name != "test.jpg"
 
 
+def test_save_with_content_type():
+    from pyramid_storage import gcloud
+
+    fs = mock.Mock()
+    fs.filename = "test.jpg"
+
+    g = gcloud.GoogleCloudStorage(
+        credentials="/secrets/credentials.json", bucket_name="my_bucket", extensions="images"
+    )
+
+    with mock.patch(
+        "pyramid_storage.gcloud.GoogleCloudStorage.get_connection", _get_mock_gcloud_connection
+    ):
+        with mock.patch("pyramid_storage.gcloud.Blob") as mocked_new_blob:
+            g.save(fs, headers={"Content-Type": "image/png"})
+            mocked_new_blob.return_value.upload_from_file.assert_called_with(
+                mock.ANY, rewind=True, content_type="image/png", predefined_acl="publicRead"
+            )
+
+
 def test_save_in_folder():
     from pyramid_storage import gcloud
 
