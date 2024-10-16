@@ -11,8 +11,6 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     "License :: OSI Approved :: BSD License",
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: Pypi",
     "Framework :: Pyramid",
     "Operating System :: OS Independent",
 ]
