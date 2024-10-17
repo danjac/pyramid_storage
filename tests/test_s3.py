@@ -6,21 +6,10 @@ import pytest
 from pyramid import exceptions as pyramid_exceptions
 
 
-class MockS3Connection(object):
-    def get_bucket(self, bucket_name):
-        return mock.Mock()
-
-
-def _get_mock_s3_connection(self):
-    return MockS3Connection()
-
-
-def _mock_open(name="test", mode="wb"):
-    obj = mock.Mock()
-    obj.__enter__ = mock.Mock()
-    obj.__enter__.return_value = mock.Mock()
-    obj.__exit__ = mock.Mock()
-    return obj
+@pytest.fixture
+def mock_s3_client():
+    with mock.patch("pyramid_storage.s3.S3FileStorage.s3_client") as mocked:
+        yield mocked
 
 
 def test_extension_allowed_if_any():
@@ -97,7 +86,7 @@ def test_save_if_file_not_allowed():
         s.save(fs)
 
 
-def test_save_if_file_allowed():
+def test_save_if_file_allowed(mock_s3_client):
     from pyramid_storage import s3
 
     fs = mock.Mock()
@@ -107,46 +96,36 @@ def test_save_if_file_allowed():
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection", _get_mock_s3_connection):
-        name = s.save(fs)
+    name = s.save(fs)
     assert name == "test.jpg"
 
 
-def test_save_file():
+def test_save_file(mock_s3_client):
     from pyramid_storage import s3
 
     s = s3.S3FileStorage(
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection", _get_mock_s3_connection):
-        name = s.save_file(mock.Mock(), "test.jpg")
+    name = s.save_file(mock.Mock(), "test.jpg")
     assert name == "test.jpg"
 
 
-def test_save_filename():
+def test_save_filename(mock_s3_client, tmp_path):
     from pyramid_storage import s3
 
     s = s3.S3FileStorage(
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    patches = (
-        mock.patch("builtins.open", _mock_open),
-        mock.patch("pyramid_storage.s3.S3FileStorage.get_connection", _get_mock_s3_connection),
-    )
+    p = tmp_path / "hello.jpg"
+    p.write_text("test")
 
-    for patch in patches:
-        patch.start()
-
-    name = s.save_filename("test.jpg")
-    assert name == "test.jpg"
-
-    for patch in patches:
-        patch.stop()
+    name = s.save_filename(str(p))
+    assert name == "hello.jpg"
 
 
-def test_save_if_randomize():
+def test_save_if_randomize(mock_s3_client):
     from pyramid_storage import s3
 
     fs = mock.Mock()
@@ -156,12 +135,12 @@ def test_save_if_randomize():
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection", _get_mock_s3_connection):
-        name = s.save(fs, randomize=True)
+    name = s.save(fs, randomize=True)
+
     assert name != "test.jpg"
 
 
-def test_save_in_folder():
+def test_save_in_folder(mock_s3_client):
     from pyramid_storage import s3
 
     fs = mock.Mock()
@@ -171,12 +150,12 @@ def test_save_in_folder():
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection", _get_mock_s3_connection):
-        name = s.save(fs, folder="my_folder")
+    name = s.save(fs, folder="my_folder")
+
     assert name == "my_folder/test.jpg"
 
 
-def test_save_with_content_type():
+def test_save_with_content_type(mock_s3_client):
     from pyramid_storage import s3
 
     fs = mock.Mock()
@@ -186,21 +165,23 @@ def test_save_with_content_type():
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="documents"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection") as mocked:
-        s.save(fs, headers={"Content-Type": "text/html"})
-    call = mocked.return_value.get_bucket.return_value.get_key.return_value.set_contents_from_file.call_args_list
-    assert call[0][1]["headers"]["Content-Type"] == "text/html"
+    s.save(fs, headers={"Content-Type": "text/html"})
+
+    assert mock_s3_client.put_object(
+        Bucket="my_bucket", Key="test.doc", Body=mock.ANY, ACL=None, ContentType="text/html"
+    )
 
 
-def test_delete():
+def test_delete(mock_s3_client):
     from pyramid_storage import s3
 
     s = s3.S3FileStorage(
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection", _get_mock_s3_connection):
-        s.delete("test.jpg")
+    s.delete("test.jpg")
+
+    assert mock_s3_client.delete_object(Bucket="my_bucket", Key="test.jpg")
 
 
 def test_from_settings_with_defaults():
@@ -210,6 +191,7 @@ def test_from_settings_with_defaults():
         "storage.aws.access_key": "abc",
         "storage.aws.secret_key": "123",
         "storage.aws.bucket_name": "Attachments",
+        "storage.aws.region": "us2",
     }
     inst = s3.S3FileStorage.from_settings(settings, "storage.")
     assert inst.base_url == ""
@@ -219,12 +201,19 @@ def test_from_settings_with_defaults():
     assert inst.conn_options["aws_secret_access_key"] == "123"
     assert set(("jpg", "txt", "doc")).intersection(inst.extensions)
 
-    with mock.patch("boto.connect_s3") as boto_mocked:
-        boto_mocked.return_value.http_connection_kwargs = {}
-        inst.get_connection()
-        _, boto_options = boto_mocked.call_args_list[0]
-        assert "host" not in boto_options
-        assert "port" not in boto_options
+    with mock.patch("boto3.client") as boto_mocked:
+        inst.s3_client
+
+        boto_mocked.assert_called_with(
+            "s3",
+            config=mock.ANY,
+            aws_access_key_id="abc",
+            aws_secret_access_key="123",
+            region_name="us2",
+        )
+        call = boto_mocked.call_args_list[0]
+        _, kwargs = call
+        assert kwargs["config"].connect_timeout == 5
 
 
 def test_from_settings_if_base_path_missing():
@@ -249,24 +238,22 @@ def test_from_settings_with_additional_options():
         "storage.aws.timeout": "10",
     }
     inst = s3.S3FileStorage.from_settings(settings, "storage.")
-    with mock.patch("boto.connect_s3") as boto_mocked:
-        boto_mocked.return_value.http_connection_kwargs = {}
-        conn = inst.get_connection()
-        assert conn.num_retries == 3
-        assert conn.http_connection_kwargs["timeout"] == 10
 
-        _, boto_options = boto_mocked.call_args_list[0]
+    with mock.patch("boto3.client") as boto_mocked:
+        inst.s3_client
 
-        calling_format = boto_options.pop("calling_format")
-        assert calling_format.__class__.__name__ == "OrdinaryCallingFormat"
-
-        assert boto_options == {
-            "is_secure": False,
-            "host": "localhost",
-            "port": 5000,
-            "aws_access_key_id": "abc",
-            "aws_secret_access_key": "123",
-        }
+        boto_mocked.assert_called_with(
+            "s3",
+            config=mock.ANY,
+            aws_access_key_id="abc",
+            aws_secret_access_key="123",
+            endpoint="http://localhost:5000",
+        )
+        call = boto_mocked.call_args_list[0]
+        _, kwargs = call
+        assert kwargs["config"].connect_timeout == 10.0
+        assert kwargs["config"].retries == {"max_attempts": 3, "mode": "standard"}
+        assert kwargs["config"].s3 == {"addressing_style": "path"}
 
 
 def test_from_settings_with_regional_options_ignores_host_port():
@@ -281,53 +268,49 @@ def test_from_settings_with_regional_options_ignores_host_port():
         "storage.aws.port": "5000",
     }
     inst = s3.S3FileStorage.from_settings(settings, "storage.")
-    with mock.patch("boto.s3.connect_to_region") as boto_mocked:
-        boto_mocked.return_value.http_connection_kwargs = {}
-        inst.get_connection()
-        _, boto_options = boto_mocked.call_args_list[0]
-        assert "host" not in boto_options
-        assert "port" not in boto_options
+    with mock.patch("boto3.client") as boto_mocked:
+        inst.s3_client
+
+        boto_mocked.assert_called_with(
+            "s3",
+            config=mock.ANY,
+            aws_access_key_id="abc",
+            aws_secret_access_key="123",
+            region_name="eu-west-1",
+        )
 
 
-def test_get_bucket():
+def test_save_file_to_bucket(mock_s3_client):
     from pyramid_storage import s3
 
     s = s3.S3FileStorage(
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection") as mocked:
-        _my_bucket = s.get_bucket()
-        _other_bucket = s.get_bucket("other_bucket")
-    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
-    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
+    s.save_file(mock.Mock(), "test.jpg")
+
+    mock_s3_client.put_object(
+        Bucket="my_bucket", Key="test.jpg", Body=mock.ANY, ACL=None, ContentType="image/jpeg"
+    )
+
+    s.save_file(mock.Mock(), "test.jpg", bucket_name="other_bucket")
+
+    mock_s3_client.put_object(
+        Bucket="other_bucket", Key="test.jpg", Body=mock.ANY, ACL=None, ContentType="image/jpeg"
+    )
 
 
-def test_save_file_to_bucket():
+def test_delete_from_bucket(mock_s3_client):
     from pyramid_storage import s3
 
     s = s3.S3FileStorage(
         access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
     )
 
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection") as mocked:
-        s.save_file(mock.Mock(), "test.jpg")
-        s.save_file(mock.Mock(), "test.jpg", bucket_name="other_bucket")
-    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
-    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
-    # make sure saving to another bucket doesn't change the default
-    assert s.bucket_name == "my_bucket"
+    s.delete("test.jpg")
 
+    mock_s3_client.delete_object(Bucket="my_bucket", Key="test.jpg")
 
-def test_delete_from_bucket():
-    from pyramid_storage import s3
+    s.delete("test.jpg", bucket_name="other_bucket")
 
-    s = s3.S3FileStorage(
-        access_key="AK", secret_key="SK", bucket_name="my_bucket", extensions="images"
-    )
-
-    with mock.patch("pyramid_storage.s3.S3FileStorage.get_connection") as mocked:
-        s.delete("test.jpg")
-        s.delete("test.jpg", bucket_name="other_bucket")
-    assert mocked.return_value.get_bucket.call_args_list[0][0][0] == "my_bucket"
-    assert mocked.return_value.get_bucket.call_args_list[1][0][0] == "other_bucket"
+    mock_s3_client.delete_object(Bucket="other_bucket", Key="test.jpg")

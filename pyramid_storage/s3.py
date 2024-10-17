@@ -53,46 +53,44 @@ class S3FileStorage(object):
         self.extensions = resolve_extensions(extensions)
         self.conn_options = conn_options
 
-    def get_connection(self):
+    @property
+    def s3_client(self):
         try:
-            import boto
+            import boto3
         except ImportError:
-            raise RuntimeError("You must have boto installed to use s3")
+            raise RuntimeError("You must have boto3 installed to use s3")
+        from botocore.config import Config
+        from botocore.exceptions import NoCredentialsError
 
-        from boto.s3 import connect_to_region
-        from boto.s3.connection import OrdinaryCallingFormat
+        timeout = float(self.conn_options.pop("timeout"))
+        conn_config = {"connect_timeout": timeout}
 
-        options = self.conn_options.copy()
-        options["is_secure"] = asbool(options["is_secure"])
+        num_retries = int(self.conn_options.pop("num_retries"))
+        if num_retries > 1:
+            conn_config["retries"] = {"max_attempts": num_retries, "mode": "standard"}
+        if asbool(self.conn_options.get("use_path_style")):
+            conn_config["s3"] = {"addressing_style": "path"}
 
-        if options["port"]:
-            options["port"] = int(options["port"])
+        client_kwargs = {
+            "aws_access_key_id": self.conn_options.get("aws_access_key_id"),
+            "aws_secret_access_key": self.conn_options.get("aws_secret_access_key"),
+        }
+        if self.conn_options["region"] is not None:
+            client_kwargs["region_name"] = self.conn_options.get("region")
         else:
-            del options["port"]
+            protocol = "http" if self.conn_options.get("is_secure") else "https"
+            host = self.conn_options["host"]
+            port = self.conn_options["port"]
+            client_kwargs["endpoint"] = f"{protocol}://{host}:{port}"
 
-        if not options["host"]:
-            del options["host"]
-
-        if asbool(options.pop("use_path_style")):
-            options["calling_format"] = OrdinaryCallingFormat()
-
-        num_retries = int(options.pop("num_retries"))
-        timeout = float(options.pop("timeout"))
-
-        region = options.pop("region")
-        if region:
-            del options["host"]
-            del options["port"]
-            conn = connect_to_region(region, **options)
-        else:
-            conn = boto.connect_s3(**options)
-
-        conn.num_retries = num_retries
-        conn.http_connection_kwargs["timeout"] = timeout
-        return conn
-
-    def get_bucket(self, bucket_name=None):
-        return self.get_connection().get_bucket(bucket_name or self.bucket_name)
+        try:
+            return boto3.client(
+                "s3",
+                config=Config(**conn_config),
+                **client_kwargs,
+            )
+        except NoCredentialsError:
+            raise RuntimeError("AWS credentials are missing or incorrect")
 
     def url(self, filename):
         """Returns entire URL of the filename, joined to the base_url
@@ -102,7 +100,11 @@ class S3FileStorage(object):
         return urllib.parse.urljoin(self.base_url, filename)
 
     def exists(self, filename, bucket_name=None):
-        return self.get_bucket(bucket_name).new_key(filename).exists()
+        try:
+            self.s3_client.head_object(Bucket=bucket_name or self.bucket_name, Key=filename)
+            return True
+        except self.s3_client.exceptions.ClientError:
+            return False
 
     def delete(self, filename, bucket_name=None):
         """Deletes the filename. Filename is resolved with the
@@ -112,7 +114,7 @@ class S3FileStorage(object):
         :param filename: base name of file
         :param bucket_name: name of the bucket, if not default
         """
-        self.get_bucket(bucket_name).delete_key(filename)
+        self.s3_client.delete_object(Bucket=bucket_name or self.bucket_name, Key=filename)
 
     def filename_allowed(self, filename, extensions=None):
         """Checks if a filename has an allowed extension
@@ -222,15 +224,15 @@ class S3FileStorage(object):
         content_type = headers.get("Content-Type")
         if content_type is None:
             content_type, _ = mimetypes.guess_type(filename)
-            content_type = content_type or "application/octet-stream"
-            headers["Content-Type"] = content_type
-
-        bucket = self.get_bucket(bucket_name)
-
-        key = bucket.get_key(filename) or bucket.new_key(filename)
+        content_type = content_type or "application/octet-stream"
 
         file.seek(0)
 
-        key.set_contents_from_file(file, headers=headers, policy=acl, replace=replace, rewind=True)
-
+        self.s3_client.put_object(
+            Bucket=bucket_name or self.bucket_name,
+            Key=filename,
+            Body=file,
+            ACL=acl,
+            ContentType=content_type,
+        )
         return filename
